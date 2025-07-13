@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Billing Form</title>
+</head>
+<body>
+  <h2>Enter Student Billing Info</h2>
+  <form method="POST" action="/submit">
+    <label>Student ID:</label><br>
+    <input type="text" name="student_id" required><br><br>
+
+    <label>Name:</label><br>
+    <input type="text" name="name" required><br><br>
+
+    <label>Amount:</label><br>
+    <input type="number" step="0.01" name="amount" required><br><br>
+
+    <label>Binding:</label><br>
+    <input type="text" name="binding" required><br><br>
+
+    <label>Status:</label><br>
+    <input type="text" name="status" required><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <hr>
+
+  <h2>Search Billing Records</h2>
+  <form method="GET" action="/search">
+    <label>Student ID:</label><br>
+    <input type="text" name="student_id" required>
+    <button type="submit">Search</button>
+  </form>
+
+  <hr>
+
+  <h2>Billing Records</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Amount</th>
+        <th>Binding</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bill in records %}
+      <tr>
+        <td>{{ bill.id }}</td>
+        <td>{{ bill.student_id }}</td>
+        <td>{{ bill.name }}</td>
+        <td>{{ bill.amount }}</td>
+        <td>{{ bill.binding }}</td>
+        <td>{{ bill.status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <form method="GET" action="/download">
+  <button type="submit">Download PDF</button>
+
+</form>
+<h2>Update Billing Record</h2>
+<form method="POST" action="/update">
+  <label>Student ID:</label><br>
+  <input type="text" name="student_id" required><br><br>
+
+  <label>New Name:</label><br>
+  <input type="text" name="name"><br>
+
+  <label>New Amount:</label><br>
+  <input type="text" name="amount"><br>
+
+  <label>New Binding:</label><br>
+  <input type="text" name="binding"><br>
+
+  <label>New Status:</label><br>
+  <input type="text" name="status"><br><br>
+
+  <button type="submit">Update</button>
+</form>
+
+
+</body>
+</html>
+
