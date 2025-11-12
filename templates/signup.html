@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Signup form{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Create Account</h2>
+    <form method="POST" action="/signup">
+        <label>User Name:</label>
+        <input type="text" name="fullname" required>
+
+        <label>School Student_id:</label>
+        <input type="email" name="email" required>
+
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm_password" required>
+
+        <button type="submit">Sign Up</button>
+    </form>
+    <div class="link">
+        Already have an account? <a href="/signin">Sign In</a>
+    </div>
+</div>
+
+<script>
+document.getElementById("signupForm").addEventListener("submit", function(event) {
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirm_password").value;
+    const errorMsg = document.getElementById("errorMessage");
+
+    if (password !== confirmPassword) {
+        errorMsg.style.display = "block"; // Show error message
+        event.preventDefault(); // Stop form from submitting
+    } else {
+        errorMsg.style.display = "none"; // Hide error if matching
+    }
+});
+</script>
+{% endblock %}
+
