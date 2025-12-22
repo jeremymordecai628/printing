@@ -8,6 +8,7 @@ from xhtml2pdf import pisa
 import pymysql
 from pymysql.cursors import DictCursor
 from functools import wraps
+import traceback
 
 app = Flask(__name__)
 
@@ -34,6 +35,16 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'doc','docx','xml', 'xlsx', 'pptx', 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def hash_value(value: str) -> str:
+    """
+    Hash a string value using SHA-256.
+
+    :param value: Input string to hash
+    :return: SHA-256 hexadecimal digest
+    """
+    return hashlib.sha256(value.encode('utf-8')).hexdigest()
+
+
 # --- Login Required ---
 def login_required(f):
     @wraps(f)
@@ -57,80 +68,109 @@ def role_required(*roles):
         return decorated_function
     return wrapper
 
+def send_email(recipient_email, subject, body):
+    sender_email = current_app.config.get("MAIL_DEFAULT_SENDER")
+    smtp_server = current_app.config.get("MAIL_SERVER")
+    smtp_port = current_app.config.get("MAIL_PORT")
+    smtp_user = current_app.config.get("MAIL_USERNAME")
+    smtp_password = current_app.config.get("MAIL_PASSWORD")
+    smtp_tls = current_app.config.get("MAIL_USE_TLS")
+
+    msg = MIMEText(body, "html")
+    msg["Subject"] = subject
+    msg["From"] = sender_email
+    msg["To"] = recipient_email
+
+    try:
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            if smtp_tls:
+                server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.sendmail(sender_email, [recipient_email], msg.as_string())
+        print("✅ Email sent to", recipient_email)
+        return "Email sent successfully"  # ✅ Added
+    except Exception as e:
+        print("❌ Email failed:", e)
+        return f"Failed to send email: {str(e)}"  # ✅ Added
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
 @app.route("/signin", methods=["GET", "POST"])
-def signin():
+def signin():import traceback
     if request.method == 'POST':
-        username = request.form.get("username")
-        password = request.form.get("password")
+        try :
+            username = request.form.get("username")
+            password = request.form.get("password")
+            hashed_password = hash_value("password")
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT password FROM users WHERE email = %s", (username,))
+            row = cursor.fetchone()
+            cursor.close()
+            # Check if user exists and verify password hash
+            if row.password==hashed_password:
+                # Store session with role
+                session["user_id"] = row["id"]
+                session["username"] = username
+                session["role"] = row["role"]
 
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
-        row = cursor.fetchone()
-        cursor.close()
-
-        # Check if user exists and verify password hash
-        if row is None or not check_password_hash(row["password"], password):
-            flash("Invalid username or password!", "error")
-            return redirect(url_for("signin"))
-
+            # ✅ Login successful
+            flash("Login successful!", "success")
+            return redirect(url_for("home"))
+        except Exception as e:
+            flash(f"Database error: {str(e)}", "error")
+            return render_template("signin.html")
     
-        # Store session with role
-        session["user_id"] = row["id"]
-        session["username"] = username
-        session["role"] = row["role"]
-
-        # ✅ Login successful
-        flash("Login successful!", "success")
-        return redirect(url_for("home"))
+    # ✅ THIS FIXES THE TypeError
     return render_template("signin.html")
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        username = request.form.get("username")
-        phone=request.form.get("no")
-        password = request.form.get("password")
-        
+        try:
+            recipient = request.form.get("email")
+            password = request.form.get("password")
 
-        # Check for  the phone no 
-        if  phone :
+            subject = "Welcome to Ressen Technologies"
+            body = """<div style="
+            max-width:600px; margin:0 auto; background-color:#ffffff; border-radius:8px;
+            box-shadow:0 4px 12px rgba(0,0,0,0.1);
+            font-family:Arial, Helvetica, sans-serif;">
+            <div style="background-color:#0f766e;padding:20px;text-align:center;color:#ffffff;
+            border-radius:8px 8px 0 0;">
+            <h2>Welcome to Ressen Technologies</h2>
+            </div>
+            <div style="padding:25px;color:#333333;">
+            <p>Dear <strong>Valued User</strong>,</p>
+            <p>Your account has been successfully created.</p>
+            <p>You may now sign in and begin using our services.</p>
+            <p>Kind regards,<br><strong>Ressen Technologies Team</strong></p>
+            </div>
+            </div>"""
+
+            hashed_password = hash_value(password)
+
+            send_email(recipient, subject, body)
+
             cursor = conn.cursor()
             cursor.execute(
-                    "INSERT INTO users (username, phone, password) VALUES (%s, %s, %s)",
-                    (username, phone, hashed_password)
-                    )
+                "INSERT INTO users (email, password) VALUES (%s, %s)",
+                (recipient, hashed_password)
+            )
             conn.commit()
             cursor.close()
-            flash("Account created successfully!", "success")
+
+            flash("Account created successfully! Kindly sign in.", "success")
             return redirect(url_for("signin"))
-        
-        # Or skip the   if 
-        cursor=conn.cursor()
-        cursor.excute(
-                "INSERT INTO users(Username, password)VALUES(%s, %s)",
-                (username, password)
-                )
-        flash("Account created successfully!", "success")
-        return redirect(url_for("signup"))
 
-        # Check if username already exists
-        if username in users:
-            flash("Username already exists!", "error")
-            return redirect(url_for("signup"))
+        except Exception as e:
+            traceback.print_exc()
+            flash(f"Database error: {str(e)}", "error")
+            return render_template("signup.html")
 
-        # Save hashed password
-        users[username] = generate_password_hash(password)
-        flash("Sign-up successful! You can now log in.", "success")
-        return redirect(url_for("signin"))
-
+    # ✅ REQUIRED: handles GET requests
     return render_template("signup.html")
-
-
-
 
 @app.route('/manage')
 @login_required
@@ -192,7 +232,6 @@ def upload_page():
                     cursor.execute(
                             "INSERT INTO work (student_id, filepath) VALUES (%s, %s)",
                             (student_id, filepath)
-               @login_required
              )
                     conn.commit()
                     flash("File uploaded successfully!", "success")
@@ -211,42 +250,50 @@ def upload_page():
 @login_required
 @role_required("admin")
 def update():
-    student_id = request.form.get('student_id', '').strip()
-    name = request.form.get('name', '').strip()
-    amount = request.form.get('amount', '').strip()
-    binding = request.form.get('binding', '').strip()
-    status = request.form.get('status', '').strip()
+    """
+    Retrieve the file path for a student's work from DB, calculate price, 
+    update DB, and send the file.
+    """
 
-    fields = []
-    values = []
+    work = request.form.get('work_id', '').strip()
+    bind = request.form.get('binding', '').strip()
 
-    if name:
-        fields.append("name = %s")
-        values.append(name)
-    if amount:
-        fields.append("amount = %s")
-        values.append(amount)
-    if binding:
-        fields.append("binding = %s")
-        values.append(binding)
-    if status:
-        fields.append("status = %s")
-        values.append(status)
+    # Convert to boolean
+    is_bind = True if bind == 'true' else False
 
-    if not fields:
-        return "No fields to update."
+    # Retrieve the file path
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT filepath FROM work WHERE work_id = %s LIMIT 1", (work,))
+        result = cursor.fetchone()
 
-    values.append(student_id)
+    if not result:
+        abort(404, description="No file found for this student")
 
-    try:
-        with conn.cursor() as cursor:
-            query = f"UPDATE billing SET {', '.join(fields)} WHERE student_id = %s"
-            cursor.execute(query, values)
+    filepath = result[0]
+
+    if not os.path.isfile(filepath):
+        abort(404, description="File not found on server")
+
+    # Count the number of pages in the PDF
+    with open(filepath, "rb") as pdf_file:
+        reader = PdfReader(pdf_file)
+        page_count = len(reader.pages)
+
+    # Calculate price
+    price = (page_count * 20) + (50 if is_bind else 0)
+
+    # Update the DB
+    with conn.cursor() as cursor:
+        cursor.execute(
+            "UPDATE work SET binding = %s, price = %s WHERE work_id = %s",
+            (is_bind, price, work)
+        )
         conn.commit()
-        return redirect('/')
-    except Exception as e:
-        return f"Update Error: {e}"
 
+    # Return both file and price
+    response = send_file(filepath, as_attachment=True)
+    response.headers['X-Price'] = str(price)  # Optional custom header
+    return response
 
 @app.route('/download')
 @login_required
