@@ -9,6 +9,8 @@ import pymysql
 from pymysql.cursors import DictCursor
 from functools import wraps
 import traceback
+import hashlib
+import os 
 
 app = Flask(__name__)
 
@@ -69,12 +71,12 @@ def role_required(*roles):
     return wrapper
 
 def send_email(recipient_email, subject, body):
-    sender_email = current_app.config.get("MAIL_DEFAULT_SENDER")
-    smtp_server = current_app.config.get("MAIL_SERVER")
-    smtp_port = current_app.config.get("MAIL_PORT")
-    smtp_user = current_app.config.get("MAIL_USERNAME")
-    smtp_password = current_app.config.get("MAIL_PASSWORD")
-    smtp_tls = current_app.config.get("MAIL_USE_TLS")
+    sender_email = 
+    smtp_server =
+    smtp_port = 
+    smtp_user = 
+    smtp_password = 
+    smtp_tls = 
 
     msg = MIMEText(body, "html")
     msg["Subject"] = subject
@@ -98,7 +100,7 @@ def home():
     return render_template("index.html")
 
 @app.route("/signin", methods=["GET", "POST"])
-def signin():import traceback
+def signin():
     if request.method == 'POST':
         try :
             username = request.form.get("username")
