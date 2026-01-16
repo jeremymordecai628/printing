@@ -1,127 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ressen Technologies</title>
-  <style>
-    /* Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modexs Technologies</title>
 
-    /* Background Gradient Animation */
-    body {
-      height: 100vh;
-      background: linear-gradient(270deg, #00bcd4, #8e44ad, #f39c12, #2ecc71);
-      background-size: 800% 800%;
-      animation: gradientBG 15s ease infinite;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      color: white;
-      text-align: center;
-    }
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+        }
 
-    /* Hero Section */
-    h1 {
-      font-size: 3.5em;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
-    }
+        header {
+            background-color: #0a2540;
+            color: #ffffff;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    p {
-      margin-top: 10px;
-      font-size: 1.3em;
-      opacity: 0.9;
-      max-width: 600px;
-    }
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
 
-    /* Button */
-    .btn {
-      margin-top: 30px;
-      padding: 15px 40px;
-      border: none;
-      outline: none;
-      border-radius: 30px;
-      background: white;
-      color: #2c3e50;
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.4s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
 
-    .btn:hover {
-      transform: scale(1.1);
-      background: #2c3e50;
-      color: white;
-    }
+        .hero {
+            background: linear-gradient(to right, #0a2540, #133b66);
+            color: #ffffff;
+            padding: 80px 60px;
+        }
 
-    /* Floating Circles */
-    .circle {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      animation: float 10s infinite ease-in-out;
-    }
+        .hero h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
 
-    .circle:nth-child(1) { width: 120px; height: 120px; left: 10%; top: 15%; animation-delay: 0s; }
-    .circle:nth-child(2) { width: 80px; height: 80px; right: 20%; top: 25%; animation-delay: 2s; }
-    .circle:nth-child(3) { width: 150px; height: 150px; left: 30%; bottom: 15%; animation-delay: 4s; }
-    .circle:nth-child(4) { width: 100px; height: 100px; right: 10%; bottom: 20%; animation-delay: 6s; }
+        .hero p {
+            font-size: 16px;
+            max-width: 600px;
+        }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-25px); }
-    }
+        .services {
+            padding: 60px;
+        }
 
-    footer {
-      position: absolute;
-      bottom: 15px;
-      font-size: 0.9em;
-      opacity: 0.8;
-    }
+        .services h3 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 28px;
+        }
 
-    footer a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
 
-    footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
+        .service-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .service-card {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+	.card-slider {
+		position: relative;
+                height: 150px;
+                overflow: hidden;
+                border-radius: 4px;
+                margin-bottom: 12px;
+        }
+
+	.card-slider img {
+		position: absolute;
+                width: 100%;
+                height: 150px;
+                object-fit: cover;
+                opacity: 0;
+                transition: opacity 0.6s ease;
+	}
+
+	.card-slider img.active {
+		opacity: 1;
+	}
+
+
+        .service-link:hover .service-card {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+        }
+
+        .service-card h4 {
+            margin-top: 0;
+            color: #0a2540;
+        }
+
+        .service-card p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .contact {
+            background-color: #ffffff;
+            padding: 60px;
+        }
+
+        .contact h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .contact-info {
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .social-links {
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            font-size: 22px;
+            margin: 0 12px;
+            color: #0a2540;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            color: #133b66;
+        }
+
+        footer {
+            background-color: #091e34;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
 
-  <h1>Ressen Technologies</h1>
-  <p>Innovating the Future — Empowering businesses with cutting-edge technology solutions like printing , Installation of CCTv cameras and high end systems .</p>
-  {% if 'user_id' in session %}
-  <button class="btn" onclick="window.location.href='/manage'">Get Started</button>
-  {% else %}
-  <button class="btn" onclick="window.location.href='/signin'">Get Started</button>
-  {% endif %}
+<header>
+    <h1>Modexs Technologies</h1>
+</header>
 
-  <footer>© 2025 <a href="/">Ressen Technologies</a>. All rights reserved.</footer>
+<section class="hero">
+    <h2>Reliable IT Solutions for Modern Businesses</h2>
+    <p>
+        We provide professional IT services that keep your systems secure,
+        efficient, and scalable.
+    </p>
+</section>
+
+<section class="services" id="services">
+    <h3>Our Services</h3>
+
+    <div class="service-grid">
+
+
+        <a href="{{ url_for('printing') }}" class="service-link">
+            <div class="service-card">
+		     <div class="card-slider">
+			     {% for img in printing_imgs %}
+			     <img src="{{ url_for('static', filename='images/cyber/' ~ img) }}"
+			     class="{% if loop.first %}active{% endif %}">
+			     {% endfor %}
+		     </div>
+                <h4>Printing Services</h4>
+                <p>Professional printing, scanning, and document management.</p>
+            </div>
+        </a>
+
+        <a href="{{ url_for('networking') }}" class="service-link">
+            <div class="service-card">
+		     <div class="card-slider">
+			     {% for img in game_imgs %}
+			     <img src="{{ url_for('static', filename='images/games/' ~ img) }}"
+			     class="{% if loop.first %}active{% endif %}">
+			     {% endfor %}
+		     </div>
+                <h4>Play Stastion Games</h4>
+                <p>LAN/WAN setup, cabling, and network troubleshooting.</p>
+            </div>
+        </a>
+
+        <a href="{{ url_for('development') }}" class="service-link">
+            <div class="service-card">
+		     <div class="card-slider">
+			     {% for img in library_imgs %}
+			     <img src="{{ url_for('static', filename='images/store/' ~ img) }}"
+			     class="{% if loop.first %}active{% endif %}">
+			     {% endfor %}
+		     </div>
+                <h4>App Library</h4>
+                <p>Custom web applications and backend systems.</p>
+            </div>
+        </a>
+
+        <a href="{{ url_for('support') }}" class="service-link">
+            <div class="service-card">
+		     <div class="card-slider">
+			     {% for img in support_imgs %}
+			     <img src="{{ url_for('static', filename='images/customer_care/' ~ img) }}"
+			     class="{% if loop.first %}active{% endif %}">
+			     {% endfor %}
+		     </div>
+                <h4>Technical Support</h4>
+                <p>On-site and remote IT support services.</p>
+            </div>
+        </a>
+
+	<a href="{{ url_for('maintenance') }}" class="service-link">
+		<div class="service-card">
+			 <div class="card-slider">
+				 {% for img in maintenance_imgs %}
+				 <img src="{{ url_for('static', filename='images/maintainance/' ~ img) }}"
+				 class="{% if loop.first %}active{% endif %}">
+				 {% endfor %}
+			 </div>
+			<h4>IT Maintenance</h4>
+			<p>Preventive and corrective maintenance for computers and servers.</p>
+		</div>
+	</a>
+
+    </div>
+</section>
+
+<section class="contact" id="contact">
+    <h3>Contact Us</h3>
+
+    <div class="contact-info">
+        <p><strong>Email:</strong> mordecaijeremy@gmail.com</p>
+        <p><strong>Phone:</strong> +254 111212490</p>
+        <p><strong>Location:</strong> Nairobi, Kenya</p>
+
+    </div>
+</section>
+
+<footer>
+    © 2026 NovaCore Technologies. All Rights Reserved.
+</footer>
+
 </body>
+<script>
+document.querySelectorAll('.card-slider').forEach(slider => {
+    let index = 0;
+    const images = slider.querySelectorAll('img');
+
+    if (images.length <= 1) return;
+
+    setInterval(() => {
+        images[index].classList.remove('active');
+        index = (index + 1) % images.length;
+        images[index].classList.add('active');
+    }, 3000);
+});
+</script>
+
 </html>
 

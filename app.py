@@ -11,6 +11,9 @@ from functools import wraps
 import traceback
 import hashlib
 import os 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -18,16 +21,16 @@ app.secret_key = "supersecretkey123"
 
 # MySQL connection setup using PyMySQL
 conn = pymysql.connect(
-    host="localhost",
-    user="root",
-    password="1412",
-    database="school_db",
+    host=os.getenv('dbhost'),
+    user=os.getenv('dbuser'),
+    password=os.getenv('pss'),
+    database=os.getenv('db'),
     cursorclass=DictCursor,  # This makes all rows dictionary-based
     charset='utf8mb4'
 )
 
 # File upload folder
-UPLOAD_FOLDER = "static/uploads"
+UPLOAD_FOLDER = os.getenv('mdir')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Allowed extensions
@@ -70,15 +73,28 @@ def role_required(*roles):
         return decorated_function
     return wrapper
 
-def send_email(recipient_email, subject, body):
-    sender_email = 
-    smtp_server =
-    smtp_port = 
-    smtp_user = 
-    smtp_password = 
-    smtp_tls = 
+def get_images(folder):
+    """Return list of image filenames from a static subfolder."""
+    path = os.path.join(app.static_folder, "images", folder)
+    if not os.path.exists(path):
+        return []
 
+    return [
+        f for f in os.listdir(path)
+        if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".webp"))
+    ]
+
+
+def send_email(recipient_email, subject, body):
+    MAIL_SERVER=os.getenv("MAIL_SERVER"),
+    MAIL_PORT=int(os.getenv("MAIL_PORT")),
+    MAIL_USE_TLS=os.getenv("MAIL_USE_TLS") == "True",
+    MAIL_USE_SSL=os.getenv("MAIL_USE_SSL") == "True",
+    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+    MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER")
     msg = MIMEText(body, "html")
+
     msg["Subject"] = subject
     msg["From"] = sender_email
     msg["To"] = recipient_email
@@ -97,7 +113,48 @@ def send_email(recipient_email, subject, body):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    maintenance_imgs = get_images("maintainance")
+    printing_imgs = get_images("cyber")
+    game_imgs = get_images("games")
+    library_imgs = get_images("store")
+    support_imgs = get_images("customer_care")
+    return render_template(
+        "index.html",
+        maintenance_imgs=maintenance_imgs,
+        printing_imgs=printing_imgs,
+        game_imgs=game_imgs,
+        library_imgs=library_imgs,
+        support_imgs=support_imgs
+    )
+
+@app.route("/services/maintenance")
+def maintenance():
+    return render_template("services/maintenance.html")
+
+
+@app.route("/services/printing")
+def printing():
+    return render_template("services/printing.html")
+
+
+@app.route("/services/networking")
+def networking():
+    return render_template("services/networking.html")
+
+
+@app.route("/services/development")
+def development():
+    return render_template("services/development.html")
+
+
+@app.route("/services/support")
+def support():
+    return render_template("services/support.html")
+
+
+@app.route("/services/cloud")
+def cloud():
+    return render_template("services/cloud.html")
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
