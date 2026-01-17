@@ -134,7 +134,7 @@ def maintenance():
 
 @app.route("/services/printing")
 def printing():
-    return render_template("services/printing.html")
+    return render_template("print.html")
 
 
 @app.route("/services/networking")
