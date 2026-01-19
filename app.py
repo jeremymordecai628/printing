@@ -5,6 +5,7 @@ Flask app to submit and retrieve student billing data from MySQL using PyMySQL
 from flask import Flask, render_template, request, redirect, jsonify, render_template_string, make_response, session, url_for, flash
 from io import BytesIO
 from xhtml2pdf import pisa
+from urllib.parse import urlparse, urljoin
 import pymysql
 from pymysql.cursors import DictCursor
 from functools import wraps
@@ -56,7 +57,7 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
             flash("You must be logged in to access this page", "error")
-            return redirect(url_for("signin"))
+            return redirect(url_for("signin", next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -72,6 +73,11 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return decorated_function
     return wrapper
+
+def is_safe_url(target):
+    ref = urlparse(request.host_url)
+    test = urlparse(urljoin(request.host_url, target))
+    return test.scheme in ("http", "https") and ref.netloc == test.netloc
 
 def get_images(folder):
     """Return list of image filenames from a static subfolder."""
@@ -127,34 +133,35 @@ def home():
         support_imgs=support_imgs
     )
 
-@app.route("/services/maintenance")
+@app.route("/maintenance")
 def maintenance():
-    return render_template("services/maintenance.html")
+    return render_template("maintenance.html")
 
 
-@app.route("/services/printing")
+@app.route("/printing")
+@login_required
 def printing():
     return render_template("print.html")
 
 
-@app.route("/services/networking")
+@app.route("/networking")
 def networking():
-    return render_template("services/networking.html")
+    return render_template("networking.html")
 
 
-@app.route("/services/development")
+@app.route("/development")
 def development():
-    return render_template("services/development.html")
+    return render_template("development.html")
 
 
-@app.route("/services/support")
+@app.route("/support")
 def support():
-    return render_template("services/support.html")
+    return render_template("support.html")
 
 
-@app.route("/services/cloud")
+@app.route("/cloud")
 def cloud():
-    return render_template("services/cloud.html")
+    return render_template("cloud.html")
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
@@ -162,11 +169,18 @@ def signin():
         try :
             username = request.form.get("username")
             password = request.form.get("password")
+            next_page = request.form.get("next")
             hashed_password = hash_value("password")
             cursor = conn.cursor(dictionary=True)
             cursor.execute("SELECT password FROM users WHERE email = %s", (username,))
             row = cursor.fetchone()
             cursor.close()
+
+            #check for a  secure  connection
+            if not is_safe_url(next_page):
+                flash("Kindly make sure your connection is secure")
+                return redirect(url_for("home"))
+
             # Check if user exists and verify password hash
             if row.password==hashed_password:
                 # Store session with role
@@ -174,12 +188,16 @@ def signin():
                 session["username"] = username
                 session["role"] = row["role"]
 
-            # ✅ Login successful
-            flash("Login successful!", "success")
-            return redirect(url_for("home"))
+                # ✅ Login successful
+                flash("Login successful!", "success")
+                return redirect(next_page)
+            else:
+                flash("invalid credetials")
+                return redirect(url_for("home"))
+
         except Exception as e:
             flash(f"Database error: {str(e)}", "error")
-            return render_template("signin.html")
+            return redirect(url_for("home"))
     
     # ✅ THIS FIXES THE TypeError
     return render_template("signin.html")
