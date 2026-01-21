@@ -95,30 +95,39 @@ def get_images(folder):
 
 
 def send_email(recipient_email, subject, body):
-    MAIL_SERVER=os.getenv("MAIL_SERVER"),
-    MAIL_PORT=int(os.getenv("MAIL_PORT")),
-    MAIL_USE_TLS=os.getenv("MAIL_USE_TLS") == "True",
-    MAIL_USE_SSL=os.getenv("MAIL_USE_SSL") == "True",
-    MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
-    MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER")
-    msg = MIMEText(body, "html")
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = int(os.getenv("MAIL_PORT"))
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS") == "True"
+    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL") == "True"
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER")
 
+    msg = MIMEText(body, "html")
     msg["Subject"] = subject
     msg["From"] = MAIL_USERNAME
     msg["To"] = recipient_email
 
+    print(MAIL_SERVER, MAIL_PORT, MAIL_USERNAME)
+
     try:
-        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
-            if smtp_tls:
+        if MAIL_USE_SSL:
+            server = smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT)
+        else:
+            server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT)
+            if MAIL_USE_TLS:
                 server.starttls()
-            server.login(MAIL_USERNAME, MAIL_PASSWORD)
-            server.sendmail(MAIL_USERNAME, [recipient_email], msg.as_string())
+
+        server.login(MAIL_USERNAME, MAIL_PASSWORD)
+        server.sendmail(MAIL_USERNAME, [recipient_email], msg.as_string())
+        server.quit()
+
         print("✅ Email sent to", recipient_email)
-        return "Email sent successfully"  # ✅ Added
+        return "Email sent successfully"
+
     except Exception as e:
         print("❌ Email failed:", e)
-        return f"Failed to send email: {str(e)}"  # ✅ Added
+        return f"Failed to send email: {str(e)}"
 
 @app.route("/")
 def home():
@@ -233,6 +242,7 @@ def signup():
             </div>"""
 
             hashed_password = hash_value(password)
+
 
             send_email(recipient, subject, body)
 
