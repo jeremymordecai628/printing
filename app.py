@@ -3,6 +3,9 @@
 Flask app to submit and retrieve student billing data from MySQL using PyMySQL
 """
 from flask import Flask, render_template, request, redirect, jsonify, render_template_string, make_response, session, url_for, flash
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 from io import BytesIO
 from xhtml2pdf import pisa
 from urllib.parse import urlparse, urljoin
@@ -26,7 +29,7 @@ conn = pymysql.connect(
     user=os.getenv('dbuser'),
     password=os.getenv('pss'),
     database=os.getenv('db'),
-    cursorclass=DictCursor,  # This makes all rows dictionary-based
+    cursorclass=pymysql.cursors.DictCursor,    
     charset='utf8mb4'
 )
 
@@ -102,15 +105,15 @@ def send_email(recipient_email, subject, body):
     msg = MIMEText(body, "html")
 
     msg["Subject"] = subject
-    msg["From"] = sender_email
+    msg["From"] = MAIL_USERNAME
     msg["To"] = recipient_email
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
+        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT) as server:
             if smtp_tls:
                 server.starttls()
-            server.login(smtp_user, smtp_password)
-            server.sendmail(sender_email, [recipient_email], msg.as_string())
+            server.login(MAIL_USERNAME, MAIL_PASSWORD)
+            server.sendmail(MAIL_USERNAME, [recipient_email], msg.as_string())
         print("✅ Email sent to", recipient_email)
         return "Email sent successfully"  # ✅ Added
     except Exception as e:
@@ -165,41 +168,44 @@ def cloud():
 
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
-    if request.method == 'POST':
-        try :
+    if request.method == "POST":
+        try:
             username = request.form.get("username")
             password = request.form.get("password")
             next_page = request.form.get("next")
-            hashed_password = hash_value("password")
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute("SELECT password FROM users WHERE email = %s", (username,))
+
+            hashed_password = hash_value(password)
+
+            cursor =conn.cursor()
+            cursor.execute(
+                "SELECT id, role, password FROM users WHERE user_name = %s",
+                (username,)
+            )
             row = cursor.fetchone()
             cursor.close()
 
-            #check for a  secure  connection
-            if not is_safe_url(next_page):
-                flash("Kindly make sure your connection is secure")
-                return redirect(url_for("home"))
+            if not row:
+                flash("Invalid credentials", "danger")
+                return redirect(url_for("signin"))
 
-            # Check if user exists and verify password hash
-            if row.password==hashed_password:
-                # Store session with role
+            if row["password"] == hashed_password:
                 session["user_id"] = row["id"]
                 session["username"] = username
                 session["role"] = row["role"]
 
-                # ✅ Login successful
                 flash("Login successful!", "success")
-                return redirect(next_page)
-            else:
-                flash("invalid credetials")
-                return redirect(url_for("home"))
+
+                print("NEXT:", next_page)
+
+                return redirect(next_page or url_for("home"))
+
+            flash("Invalid credentials", "danger")
+            return redirect(url_for("signin"))
 
         except Exception as e:
-            flash(f"Database error: {str(e)}", "error")
-            return redirect(url_for("home"))
-    
-    # ✅ THIS FIXES THE TypeError
+            flash(f"Database error: {str(e)}", "danger")
+            return redirect(url_for("signin"))
+
     return render_template("signin.html")
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -232,19 +238,20 @@ def signup():
 
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO users (email, password) VALUES (%s, %s)",
+                "INSERT INTO users (user_name , password) VALUES (%s, %s)",
                 (recipient, hashed_password)
             )
             conn.commit()
             cursor.close()
 
             flash("Account created successfully! Kindly sign in.", "success")
-            return redirect(url_for("signin"))
+            return redirect(url_for("home"))
 
         except Exception as e:
             traceback.print_exc()
             flash(f"Database error: {str(e)}", "error")
-            return render_template("signup.html")
+            return redirect(url_for("home"))
+    
 
     # ✅ REQUIRED: handles GET requests
     return render_template("signup.html")
