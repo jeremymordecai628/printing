@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Application Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background:#0f172a;color:#e5e7eb;font-family:Arial;margin:0 }
+        header { padding:20px;text-align:center;background:#020617 }
+        .container { max-width:1100px;margin:auto;padding:20px;display:grid;
+                     grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px }
+        .card { background:#020617;border:1px solid #1e293b;border-radius:10px;padding:20px }
+        .btn { display:block;margin-top:12px;padding:10px;background:#2563eb;color:white;
+               text-decoration:none;border-radius:6px;text-align:center }
+        .btn:hover { background:#1d4ed8 }
+        small { color:#9ca3af }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>📦 Application Store</h1>
+    <p>Automatic OS Download</p>
+</header>
+
+<div class="container">
+{% for app in apps %}
+    <div class="card">
+        <h3>{{ app.name }}</h3>
+        <p>{{ app.description }}</p>
+        <small>Version: {{ app.version }}</small>
+
+        <a class="btn" href="/download/{{ app.slug }}">Download</a>
+    </div>
+{% endfor %}
+<a href="/">← Back to Home</a>
+</div>
+
+</body>
+</html>
+

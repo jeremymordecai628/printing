@@ -129,6 +129,25 @@ def send_email(recipient_email, subject, body):
         print("❌ Email failed:", e)
         return f"Failed to send email: {str(e)}"
 
+def detect_os():
+    ua = request.user_agent.platform
+    if ua == "windows":
+        return "windows"
+    if ua == "linux":
+        return "linux"
+    if ua == "macos":
+        return "macos"
+    if ua == "android":
+        return "android"
+    return None
+
+def detect_arch():
+    machine = platform.machine().lower()
+    if "arm" in machine:
+        return "arm64"
+    return "x64"
+
+
 @app.route("/")
 def home():
     maintenance_imgs = get_images("maintainance")
@@ -161,9 +180,16 @@ def networking():
     return render_template("networking.html")
 
 
-@app.route("/development")
-def development():
-    return render_template("development.html")
+@app.route("/apps")
+@login_required
+def apps():
+    cursor=conn.cursor()
+    cursor.execute(
+            "SELECT * FROM apps WHERE active=1"
+            )
+    data = cursor.fetchall()
+    cursor.close()
+    return render_template("app.html", apps=data)
 
 
 @app.route("/support")
@@ -297,7 +323,7 @@ def form():
 def search():
     student_id = request.args.get('student_id', '').strip()
     try:
-        with conn.cursor() as cursor:
+        with co@login_requirednn.cursor() as cursor:
             cursor.execute("SELECT * FROM billing WHERE student_id = %s", (student_id,))
             records = cursor.fetchall()
         return render_template('form.html', records=records)
