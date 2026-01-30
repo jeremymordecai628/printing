@@ -201,6 +201,36 @@ def support():
 def cloud():
     return render_template("cloud.html")
 
+@app.route("/apply_promo")
+def  app_promo():
+    if request.method == "POST":
+        try :
+            promo = request.form.get("promo")
+            next_page = request.form.get("next")
+
+
+            cursor =conn.cursor()
+            cursor.execute(
+                    "SELECT code FROM users WHERE user_name = %s",
+                    (promo,)
+                    )
+            row = cursor.fetchone()
+            cursor.close()
+
+            if not row:
+                flash("Invalid credentials", "danger")
+                return redirect(url_for("signin"))
+
+            flash("thanks for the participation enjoy")
+            return redirect(next_page or url_for("home"))
+        
+        except Exception as e:
+            flash(f"The promo code is  down ")
+            return redirect(url_for("apply_promo"))
+
+        return redirect(url_for("apply_promo"))
+
+
 @app.route("/signin", methods=["GET", "POST"])
 def signin():
     if request.method == "POST":
