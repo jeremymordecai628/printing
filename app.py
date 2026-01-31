@@ -191,7 +191,13 @@ def apps():
     cursor.close()
     return render_template("app.html", apps=data)
 
-
+@app.route("/admin")
+def admin():
+    if request.method=="POST":
+        repo=request.form.get("link_value")
+        code=request.form.get("value")
+        doc=request.form.get("doc_id")
+    return render_template("admin.html")
 @app.route("/support")
 def support():
     return render_template("support.html")

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admition Portal</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+}
+
+.container {
+    width: 60%;
+    margin: 40px auto;
+}
+
+.section {
+    background: white;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.header {
+    padding: 15px;
+    background: #eaeaea;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.content {
+    display: none;
+    padding: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="section">
+        <div class="header">Upload app</div>
+        <div class="content">
+		<h1>Kindly paste your github repo link</h1>
+		<form method="post">
+                <input type="hidden" name="form_type" value="link">
+
+                <label>Enter repository Link</label>
+                <input type="url" name="link_value" placeholder="https://github.com/example.com">
+
+                <button type="submit">Submit</button>
+            </form>
+	</div>
+    </div>
+
+    <div class="section">
+        <div class="header">Promo code</div>
+        <div class="content">
+		<form method="post">
+                <label>Enter Value</label>
+                <input type="text" name="value" placeholder="Type something">
+
+                <button type="submit">Submit</button>
+            </form>
+
+            <hr>
+	</div>
+    </div>
+
+    <div class="section">
+        <div class="header">Printing Data</div>
+        <div class="content">
+		   <form onsubmit="return handleDoc(event)">
+                <label>Title</label>
+                <input type="text" id="docTitle" placeholder="Document title">
+
+                <label>Options</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="opt1"> Option A</label>
+                    <label><input type="checkbox" id="opt2"> Option B</label>
+                </div>
+
+                <button type="submit">Load Document</button>
+            </form>
+
+            <div class="doc-holder" id="docHolder">
+                Document will appear here...
+            </div>
+
+            <button onclick="printDoc()">Print Document</button>
+
+        </div>
+	</div>
+    </div>
+
+</div>
+
+<script>
+window.onload = function () {
+    document.querySelectorAll(".header").forEach(function(header) {
+        header.onclick = function () {
+            var content = this.nextElementSibling;
+
+            document.querySelectorAll(".content").forEach(function(c) {
+                if (c !== content) c.style.display = "none";
+            });
+
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        };
+    });
+};
+</script>
+
+</body>
+</html>
+
