@@ -13,8 +13,12 @@ import pymysql
 from pymysql.cursors import DictCursor
 from functools import wraps
 import traceback
+from datetime import datetime, timedelta
 import hashlib
-import os 
+import os
+import subprocess
+import secrets
+import string
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,6 +38,7 @@ conn = pymysql.connect(
 )
 
 # File upload folder
+DESTINATION = os.getenv("REPO_BASE_PATH")
 UPLOAD_FOLDER = os.getenv('mdir')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -129,6 +134,36 @@ def send_email(recipient_email, subject, body):
         print("❌ Email failed:", e)
         return f"Failed to send email: {str(e)}"
 
+def generate_unique_code(length=8):
+    """
+    Generate a secure random alphanumeric code.
+
+    Args:
+        length (int): Length of the code (default 8).
+
+    Returns:
+        str: Generated unique code.
+    """
+    alphabet = string.ascii_uppercase + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+def user_exists_with_media_role(conn, user_id):
+    """
+    Check whether a user exists and has role 'media'.
+
+    Args:
+        conn: Database connection object.
+        user_id (int): User ID.
+
+    Returns:
+        bool: True if user exists with role media, False otherwise.
+    """
+    sql = "SELECT 1 FROM `user` WHERE id = %s AND role = %s LIMIT 1"
+
+    with conn.cursor() as cursor:
+        cursor.execute(sql, (user_id, "media"))
+        return cursor.fetchone() is not None
+
 def detect_os():
     ua = request.user_agent.platform
     if ua == "windows":
@@ -191,13 +226,85 @@ def apps():
     cursor.close()
     return render_template("app.html", apps=data)
 
-@app.route("/admin")
+@app.route("/admin", methods=["GET", "POST"])
 def admin():
-    if request.method=="POST":
-        repo=request.form.get("link_value")
-        code=request.form.get("value")
-        doc=request.form.get("doc_id")
-    return render_template("admin.html")
+    file_info = None  # store DB result to pass to template
+
+    if request.method == "POST":
+        repo = request.form.get("link_value")
+        initiate = request.form.get("value")
+        doc_id = request.form.get("doc_id")
+
+        try:
+            # 1️⃣ Create Promo Code
+            if initiate:
+                user = session.get("user_id")
+                today = datetime.now()
+                future_date = today + timedelta(days=30)
+                code = generate_unique_code()
+
+                if user_exists_with_media_role(conn, user):
+                    sql = """
+                        INSERT INTO promo_codes (user_id, code, expires_at)
+                        VALUES (%s, %s, %s)
+                    """
+                    values = (user, code, future_date)
+                    with conn.cursor() as cursor:
+                        cursor.execute(sql, values)
+                        conn.commit()
+                    flash("✅ Promo code created successfully")
+                else:
+                    flash("❌ Unauthorized: role must be media")
+
+            # 2️⃣ Clone GitHub Repo
+            elif repo:
+                if not destination:
+                    flash("❌ Destination folder not set in .env")
+                else:
+                    os.makedirs(os.path.dirname(destination), exist_ok=True)
+                    command = ["git", "clone", repo, destination]
+                    result = subprocess.run(command, capture_output=True, text=True)
+                    if result.returncode != 0:
+                        flash(f"❌ Git clone failed: {result.stderr}")
+                    else:
+                        flash(f"✅ Repository cloned into: {destination}")
+
+            # 3️⃣ Retrieve file info
+            elif doc_id:
+                with conn.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT charges, amount_paid, status, file_name, user_id FROM payments WHERE id = %s",
+                        (doc_id,)
+                    )
+                    result = cursor.fetchone()
+
+                if not result:
+                    flash("❌ Record not found")
+                else:
+                    filepath = result[3]  # file_name
+                    if not os.path.exists(filepath):
+                        flash("❌ File not found on server")
+                    else:
+                        # store info to pass to template
+                        file_info = {
+                            "charges": result[0],
+                            "amount_paid": result[1],
+                            "status": result[2],
+                            "file_path": filepath
+                        }
+                        flash("✅ File ready for download")
+
+            else:
+                flash("❌ Invalid input provided")
+
+            return render_template("admin.html", file_info=file_info)
+
+        except Exception as e:
+            flash(f"❌ An error occurred: {e}")
+
+    # render template with file info if available
+    return render_template("admin.html", file_info=file_info)
+
 @app.route("/support")
 def support():
     return render_template("support.html")
