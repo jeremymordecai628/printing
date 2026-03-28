@@ -225,7 +225,39 @@ def apps():
     data = cursor.fetchall()
     cursor.close()
     return render_template("app.html", apps=data)
+@app.route("/place")
+def place():
+    if request.methods=="POST":
+        try:
+            pay=request.form.get(trans_id)
+            service=request.form.get(serv_name)
+            sql="""
+            INSERT INTO payment(trans, services)
+            VALUES(%s, %s)
+            """
+            values=(pay, service)
+            with conn.cursor() as cursor:
+                cursor.excute(sql, values)
+                conn.commit()
+            message=" prcess succesfull"
+            return (message)
+        except Exception  as e:
+            message = f"this error {e} occured"
+            return (message)
+@app.route("/check", methods=["GET", "POST"])
+def check():
+    if request.method == "POST":
+        try :
+            criteria= request.form.get(value)
+            cursor=conn.cursor()
+            cursor.excute(
+                    "SELECT * FROM payment  WHERE trans=%s"
+                    (criteria)
+                    )
+            data=cursor.fetchone()
+            
 
+            
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     file_info = None  # store DB result to pass to template
