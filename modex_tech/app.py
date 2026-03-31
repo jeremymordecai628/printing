@@ -7,7 +7,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import smtplib
 from io import BytesIO
-from xhtml2pdf import pisa
 from urllib.parse import urlparse, urljoin
 import pymysql
 from pymysql.cursors import DictCursor
@@ -244,20 +243,7 @@ def place():
         except Exception  as e:
             message = f"this error {e} occured"
             return (message)
-@app.route("/check", methods=["GET", "POST"])
-def check():
-    if request.method == "POST":
-        try :
-            criteria= request.form.get(value)
-            cursor=conn.cursor()
-            cursor.excute(
-                    "SELECT * FROM payment  WHERE trans=%s"
-                    (criteria)
-                    )
-            data=cursor.fetchone()
-            
 
-            
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     file_info = None  # store DB result to pass to template
