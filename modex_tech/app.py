@@ -476,7 +476,28 @@ def form():
     except Exception as e:
         return f"Error loading records: {e}"
 
+@app.route('/login', methods=['POST'])
+def login():
+    """
+    Handle login request and return JSON response
+    """
+    data = request.get_json()
 
+    username = data.get("username")
+    password = data.get("password")
+
+    # Validate user
+    if username in USERS and USERS[username]["password"] == password:
+        return jsonify({
+            "status": "success",
+            "id": USERS[username]["id"],
+            "name": USERS[username]["name"]
+        }), 200
+
+    return jsonify({
+        "status": "error",
+        "message": "Invalid credentials"
+    }), 401
 
 @app.route('/search', methods=['GET'])
 @login_required
