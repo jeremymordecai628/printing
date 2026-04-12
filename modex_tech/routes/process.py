@@ -4,8 +4,8 @@ from PyPDF2 import PdfReader
 from xhtml2pdf import pisa
 import os
 
-from models import db
-from models import  Billing , User, Work, allowed_file  
+from extensions import db
+from models import  User, Payment, PromoCode,AssignCode,App 
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 

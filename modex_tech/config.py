@@ -7,6 +7,10 @@ import logging
 # File upload folder
 DESTINATION = os.getenv("REPO_BASE_PATH")
 UPLOAD_FOLDER = os.getenv('mdir')
+ALLOWED_EXTENSIONS = {
+    'png', 'jpg', 'jpeg', 'doc', 'docx',
+    'xml', 'xlsx', 'pptx', 'pdf', 'txt'
+}
 
 class Config:
 

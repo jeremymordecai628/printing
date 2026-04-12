@@ -9,7 +9,7 @@ from config import Config
 from routes import blueprints
 from extensions import db, login_manager, mail
 from sqlalchemy import text
-from models import Staff
+from models import User
 from datetime import timedelta, datetime, date, timezone  # ✅ Add datetime imports
 
 
@@ -45,16 +45,13 @@ def create_app():
     
     @login_manager.user_loader
     def load_user(user_id):
-        return Staff.query.filter_by(process_id=user_id).first()
+        return User.query.filter_by(process_id=user_id).first()
 
     # ✅ Session timeout logic
     @app.before_request
     def check_session_timeout():
         g.tables_used = set()
-        exempt_routes = ["auth.callback","auth.access", "auth.confirmation", "auth.dashboard",
-                         "auth.login","auth.logout","auth.get_notification","auth.manage_display",
-                         "auth.register","auth.validation","public.about","public.cirricular",
-                         "public.contact","public.faq","public.galary","public.home","public.login_page","public.perfomance", "static"]
+        exempt_routes = []
         now = datetime.now(timezone.utc)  # Always timezone-aware
         last_activity = session.get("last_activity")
 

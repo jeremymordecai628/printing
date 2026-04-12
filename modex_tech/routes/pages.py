@@ -13,17 +13,11 @@ from flask import (
     session, url_for, flash
 )
 
-from db import db
-from models import User, PromoCode, Payment
 
-from utils import (
-    get_images,
-    login_required,
-    hash_value,
-    generate_unique_code,
-    user_exists_with_media_role,
-    send_email
-)
+from extensions import db
+from models import (User, PromoCode, Payment, get_images, login_required,
+                    hash_value, generate_unique_code,  user_exists_with_media_role,
+                    send_email )
 
 pages_bp = Blueprint('pages', __name__)
 

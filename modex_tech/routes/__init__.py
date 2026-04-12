@@ -8,8 +8,10 @@ from flask import Blueprint
 # Initialize SQLAlchemy without binding to Flask app yet
 db = SQLAlchemy()
 
-from .pages.py  import pages_bp
-from .process.py import  process_bp
+from .pages  import pages_bp
+from .process import  process_bp
 
 blueprints = [
-        (pages_bp, "/")
+        (pages_bp, "/"),
+        (process_bp, "/manage")
+        ]
