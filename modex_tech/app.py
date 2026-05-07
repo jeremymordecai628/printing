@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Main Flask application file for Ressen Technologies.
+Main Flask application file for Modex Technologies.
 This file initializes the Flask app and registers all Blueprints.
 """
 
@@ -35,13 +35,13 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.from_object(Config)
-
     db.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view = 'auth.login'
+    login_manager.login_view = 'process.logout'
 
     mail.init_app(app)
     app.extensions['mail'] = mail
+    register_blueprints(app)
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -51,28 +51,21 @@ def create_app():
     @app.before_request
     def check_session_timeout():
         g.tables_used = set()
-        exempt_routes = []
+        exempt_routes = ["pages.maintenance","pages.printing", "pages.signin","pages.signup", "process.logout"]
         now = datetime.now(timezone.utc)  # Always timezone-aware
-        last_activity = session.get("last_activity")
-
-        if  request.endpoint in exempt_routes:
-            # Update last activity
-            session["last_activity"] = now.isoformat()
-            return None 
-
-        # Prefer last_activity, else fall back to initial_activity
-        if  last_activity:
-            # Only parse if it's a string
-            if isinstance(last_activity, str):
-                last_activity = datetime.fromisoformat(last_activity)
-
+        last_activity = session.get('last_activity')
+        # 🔥 Fix: handle missing session value
+        if last_activity is None:
+            session['last_activity'] = now
+            return  # allow request to proceed
+        # If stored as string, convert (common mistake)
+        if isinstance(last_activity, str):
+            last_activity = datetime.fromisoformat(last_activity)
         if (now - last_activity) > SESSION_TIMEOUT:
-            return redirect(url_for("auth.logout")) 
-
-        # Update last activity
-        session["last_activity"] = now.isoformat()
-
-    register_blueprints(app)
+            session.clear()
+            return redirect(url_for('process.logout'))
+        # update activity
+        session['last_activity'] = now
 
     return app
 

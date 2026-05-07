@@ -33,7 +33,7 @@
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content">
 
-      <form method="POST" action="{{ url_for('signin') }}">
+      <form method="POST" action="{{ url_for('pages.signin') }}">
         <div class="modal-header">
           <h5 class="modal-title">Sign In</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -51,7 +51,7 @@
           <button class="btn btn-primary w-100">Login</button>
 
           <!-- Signup link -->
-          <a class="mt-2 text-decoration-none" href="{{ url_for('signup') }}">
+          <a class="mt-2 text-decoration-none" href="{{ url_for('pages.signup') }}">
               Create account
           </a>
         </div>

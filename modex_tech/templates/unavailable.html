@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Not Available</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 500px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #cbd5f5;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            text-decoration: none;
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 8px;
+            transition: 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Service Not Available</h1>
+        <p>This service is currently under development or temporarily unavailable.</p>
+
+        <a href="{{ url_for('pages.home') }}" class="btn">
+            ← Back Home
+        </a>
+    </div>
+
+</body>
+</html>

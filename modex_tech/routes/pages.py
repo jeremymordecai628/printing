@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 
 from flask import (
     Blueprint, render_template, request, redirect,
-    session, url_for, flash
-)
+    session, url_for, flash, current_app
+    )
 
 
 from extensions import db
@@ -30,11 +30,11 @@ pages_bp = Blueprint('pages', __name__)
 def home():
     return render_template(
         "index.html",
-        maintenance_imgs=get_images(request.app, "maintainance"),
-        printing_imgs=get_images(request.app, "cyber"),
-        game_imgs=get_images(request.app, "games"),
-        library_imgs=get_images(request.app, "store"),
-        support_imgs=get_images(request.app, "customer_care")
+        maintenance_imgs=get_images(current_app, "maintainance"),
+        printing_imgs=get_images(current_app, "cyber"),
+        game_imgs=get_images(current_app, "games"),
+        library_imgs=get_images(current_app, "store"),
+        support_imgs=get_images(current_app, "customer_care")
     )
 
 
@@ -53,9 +53,9 @@ def printing():
     return render_template("print.html")
 
 
-@pages_bp.route("/networking")
-def networking():
-    return render_template("networking.html")
+@pages_bp.route("/psgames")
+def psgames():
+    return render_template("unavailable.html")
 
 
 # =========================

@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import os
 import logging
 
+load_dotenv()  # load .env file
+
 # File upload folder
 DESTINATION = os.getenv("REPO_BASE_PATH")
 UPLOAD_FOLDER = os.getenv('mdir')

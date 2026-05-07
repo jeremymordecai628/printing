@@ -202,4 +202,4 @@ def download_pdf():
 def logout():
     session.clear()
     flash("Logged out successfully", "success")
-    return redirect(url_for("signin"))
+    return redirect(url_for("pages.signin"))

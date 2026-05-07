@@ -71,7 +71,7 @@ def login_required(f):
     def wrapper(*args, **kwargs):
         if "user_id" not in session:
             flash("Login required", "error")
-            return redirect(url_for("signin", next=request.path))
+            return redirect(url_for("pages.signin", next=request.path))
         return f(*args, **kwargs)
     return wrapper
 

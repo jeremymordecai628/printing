@@ -174,7 +174,7 @@
     <div class="service-grid">
 
 
-        <a href="{{ url_for('printing') }}" class="service-link">
+        <a href="{{ url_for('pages.printing') }}" class="service-link">
             <div class="service-card">
 		     <div class="card-slider">
 			     {% for img in printing_imgs %}
@@ -187,7 +187,7 @@
             </div>
         </a>
 
-        <a href="{{ url_for('networking') }}" class="service-link">
+        <a href="{{ url_for('pages.psgames') }}" class="service-link">
             <div class="service-card">
 		     <div class="card-slider">
 			     {% for img in game_imgs %}
@@ -200,7 +200,6 @@
             </div>
         </a>
 
-        <a href="{{ url_for('apps') }}" class="service-link">
             <div class="service-card">
 		     <div class="card-slider">
 			     {% for img in library_imgs %}
@@ -211,9 +210,7 @@
                 <h4>App Library</h4>
                 <p>Custom web applications and backend systems.</p>
             </div>
-        </a>
 
-        <a href="{{ url_for('support') }}" class="service-link">
             <div class="service-card">
 		     <div class="card-slider">
 			     {% for img in support_imgs %}
@@ -224,9 +221,8 @@
                 <h4>Technical Support</h4>
                 <p>On-site and remote IT support services.</p>
             </div>
-        </a>
 
-	<a href="{{ url_for('maintenance') }}" class="service-link">
+	<a href="{{ url_for('pages.maintenance') }}" class="service-link">
 		<div class="service-card">
 			 <div class="card-slider">
 				 {% for img in maintenance_imgs %}
