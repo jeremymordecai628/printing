@@ -5,13 +5,34 @@ from xhtml2pdf import pisa
 import os
 
 from extensions import db
-from models import  User, Payment, PromoCode,AssignCode,App 
+from models import  User, Payment, PromoCode,AssignCode,App, verify 
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
 process_bp = Blueprint('process', __name__)
 
 
+@process_bp.route("/initialiseapp", methods=["GET", "POST"])
+def initialiseapp():
+    if request.method=="POST":
+        try:
+            payload = {
+                    "username": request.form.get("username"),
+                    "password": request.form.get("password")
+                    }
+            appidentifier=request.form.get("appid")
+            user = verify(payload)
+            hashed_password = hash_value(request.form.get("password"))
+            if user and user.password == hashed_password:
+                Data = db.session.query(App.package).filter(App.status=="Active",App.id==appidentifier).first()
+                return jsonify({
+                    "message": "Validation succesfull",
+                    "packages":Data}),200
+
+            return jsonify({"message":"invialid  credetials"}),401
+
+        except Exception as e :
+              return jsonify({"status": "error","message": str(e)  }), 500
 
 
 # -------------------------
@@ -33,7 +54,7 @@ def process_bp_promo():
             flash("Thanks for participating")
             return redirect(next_page or url_for("home"))
 
-        except Exception:
+        except Exception as e:
             flash("Promo system unavailable", "danger")
             return redirect(url_for("process.process_bp_promo"))
 

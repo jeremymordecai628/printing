@@ -17,7 +17,7 @@ from flask import (
 from extensions import db
 from models import (User, PromoCode, Payment, get_images, login_required,
                     hash_value, generate_unique_code,  user_exists_with_media_role,
-                    send_email, App, verify, Application, StatusEnum )
+                    send_email )
 
 pages_bp = Blueprint('pages', __name__)
 
@@ -64,12 +64,7 @@ def apps():
     """
     Fetch all active apps and display them
     """
-    apps_list = (
-            db.session.query(App, Application)
-            .join(Application, App.application_id == Application.id)
-            .filter(App.status == StatusEnum.APPROVED)
-            .all()
-            )
+    apps_list = App.query.filter_by(active=True).all()
     return render_template("apps.html", apps=apps_list)
 
 
@@ -173,31 +168,29 @@ def admin():
 @pages_bp.route("/signin", methods=["GET", "POST"])
 def signin():
     if request.method == "POST":
-        try :
-            next_page = request.form.get("next")
-            
-            payload = {
-                    "username": request.form.get("username"),
-                    "password": request.form.get("password")
-                    }
+        username = request.form.get("username")
+        password = request.form.get("password")
+        next_page = request.form.get("next")
 
-            user = verify(payload)
-            hashed_password = hash_value(request.form.get("password"))
+        hashed_password = hash_value(password)
 
-            if user and user.password == hashed_password:
-                session["user_id"] = user.id
-                session["username"] = user.user_name
-                session["role"] = user.role
-                flash("Login successful", "success")
-                return redirect(next_page or url_for("pages.home"))
+        user = User.query.filter_by(user_name=username).first()
 
+        if not user:
             flash("Invalid credentials", "danger")
             return redirect(url_for("pages.signin"))
 
+        if user.password == hashed_password:
+            session["user_id"] = user.id
+            session["username"] = user.user_name
+            session["role"] = user.role
 
-        except Exception as e:
-            traceback.print_exc()
-            flash(str(e), "error")
+            flash("Login successful", "success")
+            return redirect(next_page or url_for("pages.home"))
+
+        flash("Invalid credentials", "danger")
+        return redirect(url_for("pages.signin"))
+
     return render_template("signin.html")
 
 

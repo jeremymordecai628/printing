@@ -200,7 +200,9 @@
             </div>
         </a>
 
-            <div class="service-card">
+
+	<a href="{{url_for('pages.apps')}} " class="service-link">
+		<div class="service-card">
 		     <div class="card-slider">
 			     {% for img in library_imgs %}
 			     <img src="{{ url_for('static', filename='images/store/' ~ img) }}"
@@ -210,6 +212,7 @@
                 <h4>App Library</h4>
                 <p>Custom web applications and backend systems.</p>
             </div>
+	</a>
 
             <div class="service-card">
 		     <div class="card-slider">

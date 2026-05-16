@@ -23,6 +23,7 @@ from email.mime.text import MIMEText
 
 from flask import session, redirect, url_for, flash, request
 from flask_login import current_user
+from .data import User
 
 
 # =========================
@@ -91,6 +92,14 @@ def role_required(*roles):
 # =========================
 # SECURITY
 # =========================
+def verify(data):
+    username=data.get("username")
+    password=data.get ("password")
+    user = User.query.filter_by(user_name=username).first()
+    if not user:
+        return None
+
+    return user
 
 def is_safe_url(target: str) -> bool:
     """

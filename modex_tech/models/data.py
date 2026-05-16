@@ -8,6 +8,17 @@ Flask-SQLAlchemy ORM models for school_db
 
 from extensions import db
 from datetime import datetime
+from enum import Enum
+
+class StatusEnum(Enum):
+    """
+    Enum for user status
+    """
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    ACTIVE = "Active"
+    PENDING = "PENDING"
+    TERMINATED = "Terminated"
 
 class User(db.Model):
     """
@@ -28,6 +39,7 @@ class User(db.Model):
 
 class Payment(db.Model):
     """
+
     payment table
     """
     __tablename__ = 'payment'
@@ -66,14 +78,62 @@ class AssignCode(db.Model):
 
 class App(db.Model):
     """
-    apps table
+    Apps table
     """
-    __tablename__ = 'apps'
+    __tablename__ = "apps"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
     name = db.Column(db.String(100), nullable=False)
+
     slug = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=True)
-    version = db.Column(db.String(50), nullable=True)
+
+    application_id = db.Column(
+        db.Integer,
+        db.ForeignKey("application.id"),
+        nullable=False
+    )
+
     active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+
+    package = db.Column(db.String(255), nullable=True)
+
+    created_at = db.Column(
+        db.DateTime,
+        server_default=db.func.current_timestamp()
+    )
+
+    status = db.Column(
+        db.Enum(StatusEnum),
+        nullable=False
+    )
+
+class Application(db.Model):
+    """
+    Application table
+    """
+    __tablename__ = "application"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    requested_at = db.Column(
+        db.DateTime,
+        server_default=db.func.current_timestamp()
+    )
+
+    description = db.Column(db.Text, nullable=True)
+
+    version = db.Column(db.String(50), nullable=True)
+
+    status = db.Column(
+        db.Enum(StatusEnum),
+        nullable=False,
+        default=StatusEnum.PENDING
+    )
+
+    # Relationship (one-to-many)
+    apps = db.relationship(
+        "App",
+        backref="application",
+        cascade="all, delete-orphan"
+    )
