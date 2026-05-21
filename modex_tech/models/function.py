@@ -76,6 +76,28 @@ def login_required(f):
         return f(*args, **kwargs)
     return wrapper
 
+def assign_id(n):
+    """
+    Generate a unique ID string by incrementing the numeric part of the given ID.
+    """
+    try:
+        if n and '-' in str(n):
+            # Split text and numeric part
+            parts = str(n).split('-')
+            text = parts[0]
+            number = int(parts[-1])
+        else:
+            # Default when no valid input is given
+            text = "ID"
+            number = 0
+
+        # Increment and format
+        new_number = f"{text}-{str(number + 1).zfill(4)}"
+        return new_number
+
+    except Exception as e:
+        print(f"Error generating number: {e}")
+        return None
 
 def role_required(*roles):
     def decorator(f):
@@ -87,6 +109,17 @@ def role_required(*roles):
             return f(*args, **kwargs)
         return wrapper
     return decorator
+
+def apply_code(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return redirect(
+            url_for(
+                "process.apply_promo",
+                next=request.path
+            )
+        )
+    return wrapper
 
 
 # =========================

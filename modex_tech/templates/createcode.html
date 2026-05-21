@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Promo Request</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        #formBox {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            width: 300px;
+        }
+
+        button {
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h3>Promo Code Request</h3>
+    <p> Hello welcome  to our social media plantform where we want users to raise awareness for ou brand,<br>
+    if interested apply by click the  button below.<br>Bewhere that this is a bussiness activety and shall be treated with  a level of proffessionalisim of such</p> 
+    <!-- Button -->
+    <a href="{{ url_for('process.request_promo') }}">
+    <button type="button">Request Promo Code</button>
+    </a>
+</body>
+</html>

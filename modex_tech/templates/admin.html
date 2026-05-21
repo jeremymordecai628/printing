@@ -1,121 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Admition Portal</title>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
 
-.container {
-    width: 60%;
-    margin: 40px auto;
-}
+        .box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 400px;
+        }
 
-.section {
-    background: white;
-    margin-bottom: 10px;
-    border-radius: 5px;
-}
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
 
-.header {
-    padding: 15px;
-    background: #eaeaea;
-    cursor: pointer;
-    font-weight: bold;
-}
+        button {
+            cursor: pointer;
+        }
 
-.content {
-    display: none;
-    padding: 15px;
-}
-</style>
+        .primary { background: #007bff; color: white; border: none; }
+        .danger { background: #dc3545; color: white; border: none; }
+        .success { background: #28a745; color: white; border: none; }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
+<h2>Admin Panel</h2>
 
-    <div class="section">
-        <div class="header">Upload app</div>
-        <div class="content">
-		<h1>Kindly paste your github repo link</h1>
-		<form method="post">
-                <input type="hidden" name="form_type" value="link">
+<form method="POST" action="{{ url_for('pages.admin') }}">
 
-                <label>Enter repository Link</label>
-                <input type="url" name="link_value" placeholder="https://github.com/example.com">
+    <!-- ========================= -->
+    <!-- 1. PROMO CODE GENERATION -->
+    <!-- ========================= -->
+    <div class="box">
+        <h3>Create Promo Code</h3>
 
-                <button type="submit">Submit</button>
-            </form>
-	</div>
+        <input type="hidden" name="value" value="1">
+
+        <button type="submit" class="success">
+            Generate Promo Code
+        </button>
     </div>
 
-    <div class="section">
-        <div class="header">Promo code</div>
-        <div class="content">
-		<form method="post">
-                <label>Enter Value</label>
-                <input type="text" name="value" placeholder="Type something">
 
-                <button type="submit">Submit</button>
-            </form>
+    <!-- ========================= -->
+    <!-- 2. GIT CLONE SECTION -->
+    <!-- ========================= -->
+    <div class="box">
+        <h3>Clone Repository</h3>
 
-            <hr>
-	</div>
+        <input type="text" name="link_value" placeholder="Git repo URL (https://...)">
+
+        <button type="submit" class="primary">
+            Clone Repo
+        </button>
     </div>
 
-    <div class="section">
-        <div class="header">Printing Data</div>
-        <div class="content">
-		   <form onsubmit="return handleDoc(event)">
-                <label>Title</label>
-                <input type="text" id="docTitle" placeholder="Document title">
 
-                <label>Options</label>
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="opt1"> Option A</label>
-                    <label><input type="checkbox" id="opt2"> Option B</label>
-                </div>
+    <!-- ========================= -->
+    <!-- 3. PAYMENT LOOKUP -->
+    <!-- ========================= -->
+    <div class="box">
+        <h3>Fetch Payment Info</h3>
 
-                <button type="submit">Load Document</button>
-            </form>
+        <input type="text" name="doc_id" placeholder="Enter document ID">
 
-            <div class="doc-holder" id="docHolder">
-                Document will appear here...
-            </div>
-
-            <button onclick="printDoc()">Print Document</button>
-
-        </div>
-	</div>
+        <button type="submit" class="danger">
+            Fetch Payment
+        </button>
     </div>
 
+</form>
+
+<hr>
+
+<!-- ========================= -->
+<!-- OPTIONAL DISPLAY AREA -->
+<!-- ========================= -->
+{% if file_info %}
+<div class="box">
+    <h3>File Info</h3>
+
+    <p><b>Charges:</b> {{ file_info.charges }}</p>
+    <p><b>Amount Paid:</b> {{ file_info.amount_paid }}</p>
+    <p><b>Status:</b> {{ file_info.status }}</p>
+    <p><b>File Path:</b> {{ file_info.file_path }}</p>
 </div>
-
-<script>
-window.onload = function () {
-    document.querySelectorAll(".header").forEach(function(header) {
-        header.onclick = function () {
-            var content = this.nextElementSibling;
-
-            document.querySelectorAll(".content").forEach(function(c) {
-                if (c !== content) c.style.display = "none";
-            });
-
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        };
-    });
-};
-</script>
+{% endif %}
 
 </body>
 </html>
-

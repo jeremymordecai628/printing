@@ -1,65 +1,147 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session, abort, send_file, make_response, render_template_string
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session, abort, send_file, make_response, render_template_string, jsonify
 from io import BytesIO
 from PyPDF2 import PdfReader
 from xhtml2pdf import pisa
 import os
-
+import json   
 from extensions import db
-from models import  User, Payment, PromoCode,AssignCode,App, verify 
+from models import  User, Payment, PromoCode,AssignCode,App, verify, login_required, apply_code, hash_value,Download,  assign_id
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
 process_bp = Blueprint('process', __name__)
-
+@process_bp.route("/downloadapp", methods=["GET", "POST"])
+@login_required
+@apply_code
+def  downloadapp():
+    if request.methods=="POST":
+        #I will place the logic to download apps here  
+        return render_template("test.html")
+    return render_template("test.html")
 
 @process_bp.route("/initialiseapp", methods=["GET", "POST"])
 def initialiseapp():
-    if request.method=="POST":
+    if request.method == "POST":
         try:
             payload = {
-                    "username": request.form.get("username"),
-                    "password": request.form.get("password")
-                    }
-            appidentifier=request.form.get("appid")
+                "username": request.form.get("username"),
+                "password": request.form.get("password")
+            }
+
+            appidentifier = request.form.get("appid")
+
             user = verify(payload)
-            hashed_password = hash_value(request.form.get("password"))
-            if user and user.password == hashed_password:
-                Data = db.session.query(App.package).filter(App.status=="Active",App.id==appidentifier).first()
-                return jsonify({
-                    "message": "Validation succesfull",
-                    "packages":Data}),200
+            hashed_password = hash_value(payload["password"])
 
-            return jsonify({"message":"invialid  credetials"}),401
+            if not user or user.password != hashed_password:
+                return jsonify({"message": "invalid credentials"}), 401
 
-        except Exception as e :
-              return jsonify({"status": "error","message": str(e)  }), 500
+            # get app package
+            Data = db.session.query(App.package)\
+                .filter(App.status == "Active", App.id == appidentifier)\
+                .first()
 
+            if not Data or not Data[0]:
+                return jsonify({"message": "Error occurred while retrieving data"}), 401
+
+            packages = Data[0]
+
+            # normalize packages into list
+            if isinstance(packages, str):
+                packages = json.loads(packages)
+
+            if isinstance(packages, dict):
+                packages = [packages]
+
+            if packages is None:
+                packages = []
+
+            # generate download id
+            criteria = db.session.query(Download.download_id)\
+                .order_by(Download.download_id.desc())\
+                .first()
+
+            latest_id = criteria.download_id if criteria else None
+            down_id = assign_id(latest_id)
+
+            if not down_id:
+                return jsonify({"message": "Error generating download id"}), 500
+
+            # save download
+            new_download = Download(
+                download_id=down_id,
+                user_id=user.id,
+                app_id=int(appidentifier)
+            )
+
+            db.session.add(new_download)
+            db.session.commit()
+
+            # append AFTER normalization (always safe now)
+            packages.append({
+                "client_id": user.id,
+                "downloadid": down_id
+            })
+
+            return jsonify({
+                "message": "Validation successful",
+                "packages": packages
+            }), 200
+
+        except Exception as e:
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
 
 # -------------------------
 # Promo
 # -------------------------
 @process_bp.route("/process_bply_promo", methods=["GET", "POST"])
+@login_required
 def process_bp_promo():
     if request.method == "POST":
         try:
             promo = request.form.get("promo")
             next_page = request.form.get("next")
 
-            row = User.query.filter_by(user_name=promo).first()
+            row =db.session.query(User, PromoCode).join(PromoCode, User.id == PromoCode.user_id).filter(PromoCode.code == promo, PromoCode.status.in_(["Active", "Terminated"])).first()
 
             if not row:
-                flash("Invalid credentials", "danger")
-                return redirect(url_for("signin"))
+                flash("Invalid code", "danger")
+                return redirect(next_page or url_for("pages.home")) 
 
-            flash("Thanks for participating")
-            return redirect(next_page or url_for("home"))
+            new_count = row.used_count +1
+            user, promo_obj = row
+            if PromoCode.status=="Active":
+                if new_count>= row.max_uses:
+                    # send email
+                    send_email(
+                            row.user_name,
+                            "Hello this is to inform you that your promo code has expired",
+                            "<h3>Promo code expired</h3>"
+                            )
+                    # update promo table
+                    promo_obj.status="Terminated"
+                    promo_obj.used_count= new_count
+                    flash ("Sorry code  expired")
+
+                else :
+                    #update used_count
+                    promo_obj.used_count= new_count
+                    flash("Succeded Thanks for participating")
+            else :
+                promo_obj.used_count= new_count
+                flash ("Sorry code  expired")
+
+            return redirect(next_page or url_for("process_bply_promo"))
+        
 
         except Exception as e:
             flash("Promo system unavailable", "danger")
-            return redirect(url_for("process.process_bp_promo"))
+            return redirect(url_for("process_bply_promo"))
 
-    return render_template("promo.html")
-
+        return render_template("apply.html")
 
 # -------------------------
 # Manage

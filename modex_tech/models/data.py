@@ -137,3 +137,38 @@ class Application(db.Model):
         backref="application",
         cascade="all, delete-orphan"
     )
+class Download(db.Model):
+    """
+    Represents a record of a user downloading an app.
+    """
+
+    __tablename__ = "downloads"
+
+    download_id = db.Column(
+            db.String(36),
+            primary_key=True,
+            nullable=False
+            )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False
+    )
+
+    app_id = db.Column(
+        db.Integer,
+        db.ForeignKey("apps.id", ondelete="CASCADE"),
+        primary_key=True,
+        nullable=False
+    )
+
+    download_date = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"<Download user_id={self.user_id} app_id={self.app_id}>"
