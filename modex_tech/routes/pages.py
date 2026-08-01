@@ -17,7 +17,7 @@ from flask import (
 from extensions import db
 from models import (User, PromoCode, Payment, get_images, login_required,
                     hash_value, generate_unique_code,  user_exists_with_media_role,
-                    send_email, App, verify, Application, StatusEnum )
+                    send_email, Library, verify, Application, StatusEnum )
 
 pages_bp = Blueprint('pages', __name__)
 
@@ -58,19 +58,19 @@ def printing():
 def psgames():
     return render_template("unavailable.html")
 
-@pages_bp.route("/apps")
+@pages_bp.route("/Library")
 @login_required
-def apps():
+def Library():
     """
-    Fetch all active apps and display them
+    Fetch all active Librarys and display them
     """
-    apps_list = (
-            db.session.query(App, Application)
-            .join(Application, App.application_id == Application.id)
-            .filter(App.status == StatusEnum.APPROVED)
+    Librarys_list = (
+            db.session.query(Library, Application)
+            .join(Librarylication, Library.application_id == Application.id)
+            .filter(App.status == StatusEnum.LibraryROVED)
             .all()
             )
-    return render_template("apps.html", apps=apps_list)
+    return render_template("Librarys.html", Library=Library_list)
 
 
 # =========================
@@ -185,6 +185,10 @@ def signin():
             hashed_password = hash_value(request.form.get("password"))
 
             if user and user.password == hashed_password:
+                result =UserPromotions.query.filter_by(user_id=user.id).first()
+                if result :
+                    session["user_status"]="PROMO"
+
                 session["user_id"] = user.id
                 session["username"] = user.user_name
                 session["role"] = user.role

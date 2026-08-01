@@ -34,8 +34,61 @@ class User(db.Model):
 
     # Relationships
     promo_codes = db.relationship('PromoCode', backref='user', lazy=True, cascade="all, delete-orphan")
-    assigned_codes = db.relationship('AssignCode', backref='user', lazy=True, cascade="all, delete-orphan")
+    assigned_codes = db.relationship('UserPromotions', backref='user', lazy=True, cascade="all, delete-orphan")
 
+class Login(db.Model):
+    """
+    Tracks user login activity with status
+    """
+    __tablename__ = 'login'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    status = db.Column(
+        db.Enum(StatusEnum),
+        nullable=False,
+        default=StatusEnum.PENDING
+    )
+
+    last_login = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"<Login user_id={self.user_id} status={self.status} last_login={self.last_login}>"
+
+class UserPromotions(db.Model):
+    """
+    Association table linking users to promo codes
+    """
+    __tablename__ = 'user_promotions'
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id', ondelete='CASCADE'),
+        primary_key=True,
+        unique=True,
+        nullable=False
+    )
+
+    code = db.Column(
+        db.String(50),
+        db.ForeignKey('promo_codes.code', ondelete='CASCADE'),
+        primary_key=True,
+        unique=True,
+        nullable=False
+    )
+
+    def __repr__(self):
+        return f"<UserPromotions user_id={self.user_id} code={self.code}>"
 
 class Payment(db.Model):
     """
@@ -66,17 +119,9 @@ class PromoCode(db.Model):
     active = db.Column(db.Boolean, default=True)
 
 
-class AssignCode(db.Model):
-    """
-    assign_code table
-    """
-    __tablename__ = 'assign_code'
-
-    code = db.Column(db.String(50), primary_key=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
 
-class App(db.Model):
+class Library(db.Model):
     """
     Apps table
     """

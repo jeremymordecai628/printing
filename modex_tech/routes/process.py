@@ -5,14 +5,14 @@ from xhtml2pdf import pisa
 import os
 import json   
 from extensions import db
-from models import  User, Payment, PromoCode,AssignCode,App, verify, login_required, apply_code, hash_value,Download,  assign_id
+from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download,  assign_id
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
 process_bp = Blueprint('process', __name__)
 @process_bp.route("/downloadapp", methods=["GET", "POST"])
 @login_required
-@apply_code
+@apply_code()
 def  downloadapp():
     if request.methods=="POST":
         #I will place the logic to download apps here  
@@ -38,7 +38,7 @@ def initialiseapp():
 
             # get app package
             Data = db.session.query(App.package)\
-                .filter(App.status == "Active", App.id == appidentifier)\
+                .filter(Library.status == "Active", Library.id == appidentifier)\
                 .first()
 
             if not Data or not Data[0]:
@@ -129,10 +129,13 @@ def process_bp_promo():
                 else :
                     #update used_count
                     promo_obj.used_count= new_count
+                    session["user_status"]="PROMO"
                     flash("Succeded Thanks for participating")
             else :
                 promo_obj.used_count= new_count
                 flash ("Sorry code  expired")
+            
+            db.session.commit()
 
             return redirect(next_page or url_for("process_bply_promo"))
         

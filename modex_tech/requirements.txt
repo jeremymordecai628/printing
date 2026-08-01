@@ -1,0 +1,10 @@
+Flask==3.0.3
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+
+PyPDF2==3.0.1
+xhtml2pdf==0.2.15
+reportlab==4.0.9
+
+PyMySQL==1.1.1
+python-dotenv==1.0.1

@@ -56,6 +56,8 @@ def user_id():
     return None
 
 
+
+
 def hash_value(value: str) -> str:
     """
     Hash a string using SHA-256.
@@ -70,9 +72,17 @@ def hash_value(value: str) -> str:
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
+        login_id= session.get("login_id")
         if "user_id" not in session:
             flash("Login required", "error")
+            return redirect(url_for("pages.signin", next=request.path)) 
+
+        #  Check login status
+        login_record = Login.query.filter_by(id=login_id).first()
+        if not login_record or login_record.status != StatusEnum.ACTIVE:
+            flash("Session expired") 
             return redirect(url_for("pages.signin", next=request.path))
+
         return f(*args, **kwargs)
     return wrapper
 
@@ -110,17 +120,26 @@ def role_required(*roles):
         return wrapper
     return decorator
 
-def apply_code(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        return redirect(
-            url_for(
-                "process.apply_promo",
-                next=request.path
-            )
-        )
-    return wrapper
+def apply_code():
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            status = session.get("user_status")
+            required_status="PROMO"
 
+            # Prevent infinite redirect loop
+            if request.endpoint == "process.apply_promo":
+                return f(*args, **kwargs)
+
+            if not status or status != required_status:
+                flash("Kindly apply promo", "warning")
+                return redirect(
+                    url_for("process.apply_promo", next=request.path)
+                )
+
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator
 
 # =========================
 # SECURITY
