@@ -16,14 +16,14 @@ import secrets
 import string
 import smtplib
 import platform
-
+import uuid    
+from datetime import datetime   
 from functools import wraps
 from urllib.parse import urlparse, urljoin
 from email.mime.text import MIMEText
-
 from flask import session, redirect, url_for, flash, request
 from flask_login import current_user
-from .data import User
+from .data import User,Login  
 
 
 # =========================
@@ -36,12 +36,41 @@ ALLOWED_EXTENSIONS = {
 }
 
 
+def generate_uuid():
+    """
+    Generate a UUID without hyphens.
+
+    Returns:
+        str: A UUID string without hyphens.
+    """
+
+    return uuid.uuid4().hex
+
 def allowed_file(filename: str) -> bool:
     """
     Check if uploaded file is allowed.
     """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def generate_tracking_code(user_id,offer,delivery_date):
+    """
+     Generate a tracking code from the
+     user ID, offer type, and delivery date.
+    """
+
+    offer_codes = {
+        "Valentine": "VAL",
+        "Birthday": "BIR",
+        "Graduation": "GRA"
+    }
+
+    current_date = datetime.now()    
+
+    return (
+        f"{user_id}"
+        f"{offer_codes.get(offer, 'UNK')}"
+        f"{current_date.strftime('%d%m%y')}"
+    )
 
 # =========================
 # USER HELPERS
@@ -72,16 +101,16 @@ def hash_value(value: str) -> str:
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        login_id= session.get("login_id")
+        login_id= session.get("ses_id")
         if "user_id" not in session:
             flash("Login required", "error")
             return redirect(url_for("pages.signin", next=request.path)) 
 
         #  Check login status
         login_record = Login.query.filter_by(id=login_id).first()
-        if not login_record or login_record.status != StatusEnum.ACTIVE:
+        if not login_record:
             flash("Session expired") 
-            return redirect(url_for("pages.signin", next=request.path))
+            return redirect(url_for("process.logout", next=request.path))
 
         return f(*args, **kwargs)
     return wrapper

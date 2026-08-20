@@ -10,8 +10,10 @@ db = SQLAlchemy()
 
 from .pages  import pages_bp
 from .process import  process_bp
+from .celebration import celebration_bp
 
 blueprints = [
         (pages_bp, "/"),
-        (process_bp, "/manage")
+        (process_bp, "/manage"),
+        (celebration_bp,"/sevice")
         ]

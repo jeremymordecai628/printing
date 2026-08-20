@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Gift Registration</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#4e54c8,#8f94fb);
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:850px;
+    background:white;
+    border-radius:20px;
+    padding:40px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:30px;
+}
+
+form{
+    display:grid;
+    gap:20px;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:10px;
+    font-size:16px;
+}
+
+textarea{
+    resize:vertical;
+    min-height:120px;
+}
+
+.package-options{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.package{
+    border:2px solid #ddd;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+}
+
+.package input{
+    width:auto;
+    margin-bottom:10px;
+}
+
+button{
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.submit-btn{
+    background:#4e54c8;
+    color:white;
+}
+
+.home-btn{
+    background:#eee;
+    color:#333;
+    text-decoration:none;
+    text-align:center;
+    display:block;
+    padding:15px;
+    border-radius:10px;
+    font-size:18px;
+}
+
+.home-btn:hover{
+    background:#ddd;
+}
+
+@media(max-width:700px){
+
+    .row{
+        grid-template-columns:1fr;
+    }
+
+    .package-options{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎁 Gift Registration Form</h1>
+
+    <p class="subtitle">
+        Register a special gift for someone you care about.
+    </p>
+
+    <form action="#" method="POST" enctype="multipart/form-data">
+
+        <div class="row">
+
+            <div>
+                <label>Recipient Name</label>
+                <input type="text" name="recipient_name" required>
+            </div>
+
+            <div>
+                <label>Recipient Email</label>
+                <input type="email" name="recipient_email" required>
+            </div>
+
+        </div>
+
+        <div>
+
+            <label>Select an Offer</label>
+
+            <div class="package-options">
+
+                <label class="package">
+                    <input
+                        type="radio"
+                        name="offer"
+                        value="Valentine"
+                        required>
+
+                    <h3>❤ Valentine's</h3>
+
+                    <p>Celebrate love.</p>
+                </label>
+
+                <label class="package">
+                    <input
+                        type="radio"
+                        name="offer"
+                        value="Birthday">
+
+                    <h3>🎂 Birthday</h3>
+
+                    <p>Celebrate a birthday.</p>
+                </label>
+
+                <label class="package">
+                    <input
+                        type="radio"
+                        name="offer"
+                        value="Graduation">
+
+                    <h3>🎓 Graduation</h3>
+
+                    <p>Celebrate an achievement.</p>
+                </label>
+
+            </div>
+
+        </div>
+
+        <div>
+
+            <label>Delivery Date</label>
+
+            <input type="date"
+                   name="delivery_date">
+
+        </div>
+
+        <div>
+
+            <label>Personal Message</label>
+
+            <textarea
+                name="message"
+                placeholder="Write your message here..."></textarea>
+
+        </div>
+
+        <div>
+
+            <label>Upload a Photo (Optional)</label>
+
+            <input type="file"
+                   name="photo">
+
+        </div>
+
+        <button class="submit-btn"
+                type="submit">
+
+            Register Gift
+
+        </button>
+
+        <a href="{{ url_for('pages.home') }}"
+           class="home-btn">
+
+            🏠 Back to Home
+
+        </a>
+
+    </form>
+
+</div>
+
+</body>
+</html>

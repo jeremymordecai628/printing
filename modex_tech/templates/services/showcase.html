@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Message</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#4e54c8,#8f94fb);
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:650px;
+    background:white;
+    border-radius:20px;
+    padding:45px 40px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+.icon{
+    font-size:60px;
+    margin-bottom:15px;
+}
+
+h1{
+    margin-bottom:10px;
+    color:#333;
+}
+
+.message{
+    margin:20px 0;
+}
+
+.flash{
+    padding:15px 20px;
+    border-radius:10px;
+    margin-bottom:12px;
+    font-size:16px;
+}
+
+.flash.success{
+    background:#d4edda;
+    color:#155724;
+    border:1px solid #c3e6cb;
+}
+
+.flash.error{
+    background:#f8d7da;
+    color:#721c24;
+    border:1px solid #f5c6cb;
+}
+
+.flash.warning{
+    background:#fff3cd;
+    color:#856404;
+    border:1px solid #ffeeba;
+}
+
+.flash.info{
+    background:#d1ecf1;
+    color:#0c5460;
+    border:1px solid #bee5eb;
+}
+
+.home-btn{
+    display:inline-block;
+    margin-top:15px;
+    padding:15px 30px;
+    background:#4e54c8;
+    color:white;
+    text-decoration:none;
+    border-radius:10px;
+    font-size:18px;
+    transition:0.3s;
+}
+
+.home-btn:hover{
+    background:#3b40a0;
+    transform:translateY(-2px);
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="icon">🎁</div>
+
+    <h1>Notification</h1>
+
+    <div class="message">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash {{ category }}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="flash info">
+                    No messages to display.
+                </div>
+
+            {% endif %}
+
+        {% endwith %}
+
+    </div>
+
+    <a href="{{ url_for('pages.home') }}" class="home-btn">
+        🏠 Go Home
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday 🎂</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 750px;
+            padding: 50px 30px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .cake {
+            font-size: 90px;
+            animation: bounce 2s infinite;
+        }
+
+        h1 {
+            font-size: 52px;
+            margin: 15px 0;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-bottom: 25px;
+        }
+
+        p {
+            font-size: 20px;
+            line-height: 1.7;
+        }
+
+        .wish {
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 15px 32px;
+            background: white;
+            color: #6c4bc1;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+
+        <div class="cake">🎂</div>
+
+        <h1>Happy Birthday!</h1>
+
+        <h2>🎉 Today is all about you 🎉</h2>
+
+        <div class="wish">
+            <p>
+                Wishing you a wonderful birthday filled with
+                happiness, laughter, love, and unforgettable memories.
+            </p>
+
+            <p>
+                May this new chapter bring you closer to your dreams
+                and give you countless reasons to smile.
+            </p>
+        </div>
+
+        <a href="#" class="button">Make a Wish ✨</a>
+
+    </div>
+
+</body>
+</html>

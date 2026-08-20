@@ -6,102 +6,144 @@
     <title>Applications</title>
 
     <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background: #0f172a;
-            color: #f1f5f9;
-            margin: 0;
-            padding: 20px;
+            background: #f4f6f9;
+            padding: 40px;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: auto;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            color: #333;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
         }
 
         .card {
-            background: #1e293b;
-            padding: 20px;
+            background: white;
             border-radius: 12px;
-            transition: 0.3s;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
         }
 
         .card:hover {
             transform: translateY(-5px);
-            background: #334155;
         }
 
-        .title {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: #38bdf8;
+        .card h2 {
+            margin-bottom: 15px;
+            color: #222;
         }
 
-        .desc {
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-            color: #cbd5f5;
+        .description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #555;
         }
 
         .meta {
-            font-size: 0.8rem;
-            color: #94a3b8;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            color: #666;
         }
 
         .btn {
-            margin-top: 15px;
             display: inline-block;
-            padding: 8px 14px;
-            background: #3b82f6;
-            color: white;
             text-decoration: none;
-            border-radius: 6px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            transition: opacity 0.2s ease;
         }
 
         .btn:hover {
-            background: #2563eb;
+            opacity: 0.85;
         }
+
+        .home-btn {
+            display: block;
+            width: fit-content;
+            margin: 40px auto 0;
+        }
+
     </style>
+
 </head>
+
 <body>
 
 <div class="container">
+
     <h1>Available Applications</h1>
 
     <div class="grid">
-        {% for app in apps %}
-        <div class="card">
-            <div class="title">{{ app.name }}</div>
 
-            <div class="desc">
+        {% for l, app in Library %}
+
+        <div class="card">
+
+            <h2>{{ l.name }}</h2>
+
+            <div class="description">
                 {{ app.description or "No description available" }}
             </div>
 
             <div class="meta">
-                Version: {{ app.version or "N/A" }} <br>
-                Created: {{ app.created_at.strftime('%Y-%m-%d') if app.created_at else "N/A" }}
+
+                <strong>Version:</strong>
+                {{ app.version or "N/A" }}
+                <br>
+
+                <strong>Package:</strong>
+                {{ l.package or "N/A" }}
+                <br>
+
+                <strong>Status:</strong>
+                {{ l.status }}
+                <br>
+
+                <strong>Active:</strong>
+                {{ "Yes" if l.active else "No" }}
+                <br>
+
+                <strong>Created:</strong>
+                {{ l.created_at.strftime("%Y-%m-%d") if l.created_at else "N/A" }}
+
             </div>
 
-            <a href="/{{ app.slug }}" class="btn">
+            <a href="/{{ l.slug }}" class="btn">
                 Open App
             </a>
+
         </div>
+
         {% endfor %}
-	        <a href="{{ url_for('pages.home') }}" class="btn">
-            ← Back Home
-        </a>
+
     </div>
+
+    <a href="{{ url_for('pages.home') }}" class="btn home-btn">
+        ← Back Home
+    </a>
+
 </div>
 
 </body>

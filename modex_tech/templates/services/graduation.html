@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations Graduate 🎓</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #141e30, #243b55);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 800px;
+            padding: 55px 35px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .cap {
+            font-size: 90px;
+            animation: float 2s infinite ease-in-out;
+        }
+
+        h1 {
+            font-size: 52px;
+            margin: 15px 0;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin: 20px 0;
+        }
+
+        p {
+            font-size: 20px;
+            line-height: 1.8;
+        }
+
+        .message {
+            max-width: 650px;
+            margin: 30px auto;
+        }
+
+        .achievement {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .achievement div {
+            padding: 15px 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 15px 35px;
+            background: white;
+            color: #243b55;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+
+        <div class="cap">🎓</div>
+
+        <h1>Congratulations!</h1>
+
+        <h2>You Did It! 🎉</h2>
+
+        <div class="message">
+
+            <p>
+                Today marks the end of one incredible journey
+                and the beginning of another.
+            </p>
+
+            <p>
+                Your hard work, dedication, and determination
+                have finally paid off. Be proud of how far
+                you've come.
+            </p>
+
+            <p>
+                The future is waiting for you.
+                Go out there and make it yours!
+            </p>
+
+        </div>
+
+        <div class="achievement">
+            <div>📚 Hard Work</div>
+            <div>💪 Dedication</div>
+            <div>🎓 Achievement</div>
+        </div>
+
+        <a href="#" class="button">Celebrate the Achievement 🎉</a>
+
+    </div>
+
+</body>
+</html>

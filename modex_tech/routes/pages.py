@@ -15,7 +15,7 @@ from flask import (
 
 
 from extensions import db
-from models import (User, PromoCode, Payment, get_images, login_required,
+from models import (User, PromoCode,Login, Payment, get_images, login_required,UserPromotions,generate_uuid,
                     hash_value, generate_unique_code,  user_exists_with_media_role,
                     send_email, Library, verify, Application, StatusEnum )
 
@@ -48,7 +48,7 @@ def maintenance():
 
 
 @pages_bp.route("/printing")
-@login_required
+#@login_required
 def printing():
     return render_template("print.html")
 
@@ -58,19 +58,14 @@ def printing():
 def psgames():
     return render_template("unavailable.html")
 
-@pages_bp.route("/Library")
-@login_required
-def Library():
+@pages_bp.route("/library")
+#@login_required
+def library():
     """
     Fetch all active Librarys and display them
     """
-    Librarys_list = (
-            db.session.query(Library, Application)
-            .join(Librarylication, Library.application_id == Application.id)
-            .filter(App.status == StatusEnum.LibraryROVED)
-            .all()
-            )
-    return render_template("Librarys.html", Library=Library_list)
+    Library_list = (db.session.query(Library, Application).join(Library, Library.application_id == Application.id).filter(Library.status == StatusEnum.APPROVED).all())
+    return render_template("Library.html", Library=Library_list)
 
 
 # =========================
@@ -185,13 +180,18 @@ def signin():
             hashed_password = hash_value(request.form.get("password"))
 
             if user and user.password == hashed_password:
-                result =UserPromotions.query.filter_by(user_id=user.id).first()
-                if result :
-                    session["user_status"]="PROMO"
-
+                ses_id=generate_uuid()
+                session["ses_id"]=ses_id   
                 session["user_id"] = user.id
                 session["username"] = user.user_name
                 session["role"] = user.role
+                new_login=Login(
+                        id=ses_id,
+                        user_id=user.id,
+                        status=StatusEnum.ACTIVE
+                        )
+                db.session.add(new_login)
+                db.session.commit()
                 flash("Login successful", "success")
                 return redirect(next_page or url_for("pages.home"))
 
@@ -229,7 +229,7 @@ def signup():
 
             send_email(
                 email,
-                "Welcome to Ressen Technologies",
+                "Welcome to Modex Technologies",
                 "<h3>Account created successfully</h3>"
             )
 

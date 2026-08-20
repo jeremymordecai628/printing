@@ -5,7 +5,7 @@ from xhtml2pdf import pisa
 import os
 import json   
 from extensions import db
-from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download,  assign_id
+from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download, assign_id,Login,StatusEnum
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
@@ -192,38 +192,20 @@ def search():
 # Upload
 # -------------------------
 @process_bp.route('/upload', methods=['GET', 'POST'])
-def upload_page():
-    if request.method == 'POST':
-        student_id = session.get('user_id')
-        file = request.files.get("file")
-
-        try:
-            if file and allowed_file(file.filename):
-
-                os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-                filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-                file.save(filepath)
-
-                new_work = Work(
-                    student_id=student_id,
-                    filepath=filepath
-                )
-
-                db.session.add(new_work)
-                db.session.commit()
-
-                flash("File uploaded successfully!", "success")
-                return redirect(url_for('process.upload_page'))
-
-            flash("Invalid file type", "danger")
-            return redirect(url_for('process.upload_page'))
-
-        except Exception as e:
-            flash(f"Database Error: {e}", "danger")
-            return redirect(url_for('process.upload_page'))
-
-    return render_template('print.html')
+def upload():
+    uploaded_file = request.files.get("file")
+    filename = secure_filename(uploaded_file.filename)
+    filepath = os.path.join("uploads",filename)
+    uploaded_file.save(filepath)
+    google_file_id = upload_to_google_drive(drive_service,filepath,filename)
+    new_file = UploadedFile(
+        filename=filename,
+        google_file_id=google_file_id
+    )
+    db.session.add(new_file)
+    db.session.commit()
+    os.remove(filepath)
+    return "Upload successful"
 
 
 # -------------------------
@@ -306,6 +288,9 @@ def download_pdf():
 # -------------------------
 @process_bp.route("/logout")
 def logout():
+    log_no=session.get("ses_id")
+    updated = (db.session.query(Login).filter(Login.id == log_no).update({"status": StatusEnum.TERMINATED}))
+    db.session.commit()
     session.clear()
     flash("Logged out successfully", "success")
-    return redirect(url_for("pages.signin"))
+    return redirect(url_for("pages.home"))
