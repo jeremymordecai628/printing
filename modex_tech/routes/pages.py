@@ -17,7 +17,7 @@ from flask import (
 from extensions import db
 from models import (User, PromoCode,Login, Payment, get_images, login_required,UserPromotions,generate_uuid,
                     hash_value, generate_unique_code,  user_exists_with_media_role,
-                    send_email, Library, verify, Application, StatusEnum )
+                    send_email, Library, verify, Application)
 
 pages_bp = Blueprint('pages', __name__)
 
@@ -48,7 +48,7 @@ def maintenance():
 
 
 @pages_bp.route("/printing")
-#@login_required
+@login_required
 def printing():
     return render_template("print.html")
 
@@ -59,12 +59,12 @@ def psgames():
     return render_template("unavailable.html")
 
 @pages_bp.route("/library")
-#@login_required
+@login_required
 def library():
     """
     Fetch all active Librarys and display them
     """
-    Library_list = (db.session.query(Library, Application).join(Library, Library.application_id == Application.id).filter(Library.status == StatusEnum.APPROVED).all())
+    Library_list = (db.session.query(Library, Application).join(Library, Library.application_id == Application.id).filter(Library.status =="APPROVED").all())
     return render_template("Library.html", Library=Library_list)
 
 
@@ -188,7 +188,7 @@ def signin():
                 new_login=Login(
                         id=ses_id,
                         user_id=user.id,
-                        status=StatusEnum.ACTIVE
+                        status="Active"
                         )
                 db.session.add(new_login)
                 db.session.commit()

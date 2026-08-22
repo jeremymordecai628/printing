@@ -10,15 +10,6 @@ from extensions import db
 from datetime import datetime
 from enum import Enum
 
-class StatusEnum(Enum):
-    """
-    Enum for users status
-    """
-    APPROVED = "APPROVED"
-    REJECTED = "REJECTED"
-    ACTIVE = "Active"
-    PENDING = "PENDING"
-    TERMINATED = "Terminated"
 
 class User(db.Model):
     """
@@ -44,7 +35,7 @@ class Login(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer,db.ForeignKey('users.id', ondelete='CASCADE'),nullable=False)
-    status = db.Column(db.Enum(StatusEnum),nullable=False,default=StatusEnum.PENDING) 
+    status = db.Column(db.Enum('APPROVED','REJECTED','Active','PENDING','Terminated'),nullable=False,default="PENDING") 
     login_time = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
     last_login = db.Column(db.DateTime,nullable=False,default=datetime.utcnow,onupdate=datetime.utcnow)
 
@@ -105,7 +96,7 @@ class Library(db.Model):
     active = db.Column(db.Boolean, default=True)
     package = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime,server_default=db.func.current_timestamp())
-    status = db.Column(db.Enum(StatusEnum),nullable=False)
+    status = db.Column(db.Enum('APPROVED','REJECTED','Active','PENDING','Terminated'),nullable=False)
 
 class Application(db.Model):
     """
@@ -118,7 +109,7 @@ class Application(db.Model):
     requested_at = db.Column(db.DateTime,server_default=db.func.current_timestamp())
     description = db.Column(db.Text, nullable=True)
     version = db.Column(db.String(50), nullable=True)
-    status = db.Column(db.Enum(StatusEnum),nullable=False,default=StatusEnum.PENDING)
+    status = db.Column(db.Enum('APPROVED','REJECTED','Active','PENDING','Terminated'),nullable=False,default="PENDING")
     # Relationship (one-to-many)
     apps = db.relationship("Library",backref="application",cascade="all, delete-orphan")
 class Download(db.Model):

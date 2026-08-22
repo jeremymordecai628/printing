@@ -5,7 +5,7 @@ from xhtml2pdf import pisa
 import os
 import json   
 from extensions import db
-from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download, assign_id,Login,StatusEnum
+from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download, assign_id,Login
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
@@ -289,7 +289,7 @@ def download_pdf():
 @process_bp.route("/logout")
 def logout():
     log_no=session.get("ses_id")
-    updated = (db.session.query(Login).filter(Login.id == log_no).update({"status": StatusEnum.TERMINATED}))
+    updated = (db.session.query(Login).filter(Login.id == log_no).update({"status":"Terminated"}))
     db.session.commit()
     session.clear()
     flash("Logged out successfully", "success")
