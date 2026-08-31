@@ -37,9 +37,7 @@ def initialiseapp():
                 return jsonify({"message": "invalid credentials"}), 401
 
             # get app package
-            Data = db.session.query(App.package)\
-                .filter(Library.status == "Active", Library.id == appidentifier)\
-                .first()
+            Data = db.session.query(App.package).filter(Library.status == "Active", Library.id == appidentifier).first()
 
             if not Data or not Data[0]:
                 return jsonify({"message": "Error occurred while retrieving data"}), 401
@@ -93,6 +91,52 @@ def initialiseapp():
                 "status": "error",
                 "message": str(e)
             }), 500
+
+@process_bp.route("/mpesa_confirmation", methods=["POST"])
+def mpesa_confirmation():
+    try :
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"ResultCode": 1,"ResultDesc": "Invalid request"}), 400
+
+        # M-Pesa confirmation fields
+        transaction_type = data.get("TransactionType")
+        transaction_id = data.get("TransID")
+        transaction_time = data.get("TransTime")
+        amount = data.get("TransAmount")
+        business_short_code = data.get("BusinessShortCode")
+        bill_ref_number = data.get("BillRefNumber")
+        invoice_number = data.get("InvoiceNumber")
+        org_account_balance = data.get("OrgAccountBalance")
+        third_party_transaction_id = data.get("ThirdPartyTransID")
+        phone_number = data.get("MSISDN")
+        first_name = data.get("FirstName")
+        middle_name = data.get("MiddleName")
+        last_name = data.get("LastName")
+        # Check whether this transaction has already been processed
+        # This prevents duplicate processing if Safaricom retries the callback.
+        existing_payment = Payment.query.filter_by(transaction_id=transaction_id).first()
+        gift= GiftRegistration.query.filter_by(account=bill_ref_number).first()
+
+        if existing_payment:
+            return jsonify({"ResultCode": 0,"ResultDesc": "Already processed"}), 200
+
+        # Create payment record
+        payment = Payment(
+                transaction_id=transaction_id,
+                amount=amount,
+                phone_number=phone_number,
+                account_number=bill_ref_number,
+                transaction_time=transaction_time
+                )
+        db.session.add(payment)
+
+        # Mark the gift as paid
+        gift.status = "Paid"
+        db.session.commit()
+        return jsonify({"ResultCode": 0,"ResultDesc": "Accepted"}), 200
+    except Exception as e:
+        return f"Error loading records: {e}"
 
 # -------------------------
 # Promo

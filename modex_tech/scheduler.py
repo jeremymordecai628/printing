@@ -11,13 +11,14 @@ def event_reached(event):
     This function runs when the scheduled event time is reached.
     """
 
-    print(f"Event reached: {event.title}")
-
-    # Put whatever should happen here.
-    # Example:
-    # send_email(...)
-    # socketio.emit(...)
-    # send_sms(...)
+    if event.tittle==Delivery:
+        result=db.query.session(GiftRegistration.recipient_email).filter(account==event.account).first()
+        html=render_template("emails/special_day.html")
+        send_email(result,"Day Notification",html)
+    else:
+         result=db.query.session(GiftRegistration).filter(account==event.account).first()
+         result.status="Terminated"
+         db.commit()
 
 
 def schedule_event(event):

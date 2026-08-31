@@ -69,7 +69,7 @@ def generate_tracking_code(user_id,offer,delivery_date):
     return (
         f"{user_id}"
         f"{offer_codes.get(offer, 'UNK')}"
-        f"{current_date.strftime('%d%m%y')}"
+        f"{current_date.strftime('%d%m%y%H%M')}"
     )
 
 # =========================

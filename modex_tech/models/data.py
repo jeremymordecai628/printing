@@ -58,11 +58,10 @@ class Payment(db.Model):
     payment table
     """
     __tablename__ = 'payment'
-
-    id = db.Column(db.Integer, primary_key=True)
-    trans = db.Column(db.String(50), unique=True, nullable=True)
-    services = db.Column(db.String(20), nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='active')
+    transaction_id=db.Column(db.String(50), primary_key=True)
+    amount=db.Column(db.Float,nullable=False)
+    phone_number=db.Column(db.String(50),nullable=False)
+    account_number=db.Column(db.String(100),db.ForeignKey('gift_registrations.account',ondelete='CASCADE'),nullable=False)
 
 
 class PromoCode(db.Model):
@@ -139,6 +138,7 @@ class GiftRegistration(db.Model):
     sender_email = db.Column(db.String(150),nullable=False)
     recipient_name = db.Column(db.String(100),nullable=False)
     recipient_email = db.Column(db.String(150),nullable=False)
+    charges=db.Column(db.Float,nullable=False)   
     offer = db.Column(db.Enum("Valentine","Birthday","Graduation",name="gift_offer_enum"),nullable=False)
     delivery_date = db.Column(db.Date,nullable=True)
     message = db.Column(db.Text,nullable=True)

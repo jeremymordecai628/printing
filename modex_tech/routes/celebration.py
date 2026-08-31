@@ -35,6 +35,7 @@ def register_gift():
                     sender_email=sender_email,
                     recipient_name=recipient_name,
                     recipient_email=recipient_email,
+                    charges=20.00,  
                     offer=offer,
                     delivery_date=delivery_date,
                     message=message,
@@ -43,7 +44,7 @@ def register_gift():
                     )
             db.session.add(gift)
             db.session.commit()
-            schedule_event(event)
+            schedule_event(GiftRegistration)
             send_email(sender_email,
                        "Gift Registration",
                        """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>You have something waiting for you</title>
@@ -70,24 +71,34 @@ def register_gift():
 def view_gift(user_id,account) :
     try:
         if user_id and account:
-            result=db.session.query(GiftRegistration).filter_by(sender_id==user_id,account==account).first()
+            result=db.session.query(GiftRegistration).filter(sender_id==user_id,account==account).first()
             if not result :
                 flash("flash we cannnot find you gift kindly email us ")
-            if result.status!="Active":
+            if result.status!="Paid":
                 if result.status=="Terminated":
                     fl_msg="Your gift has expired"
-                elif result.status=="NotPaid":
-                    fl_msg="Your gifter has not paid for the gift"
                 else:
-                    fl_msg="Your gift is not ready for delivery kindly exicise patience"
+                    fl_msg="Your gifter has not paid for the gift"
                 flash(f"{fl_msg}")
                 return redirect(url_for("celebration.showcase"))
-            if result.offer=="Valentine":
-                return render_template("services/valentines.html",contex=result)
-            elif result.offer=="Birthday":
-                return render_template("services/birthday.html",contex=result)
-            else :
-                return render_template("services/graduation.html",contex=result)
+            result2=db.successfully.query(Payment.amount).filter(Payment.account_number==account).all()
+            confirmation=0  
+            for r in result2:
+                confirmation=confirmation+ result2
+            if current_date.strftime("%d%m%y%H%M") == result.delivery_date.strftime("%d%m%y%H%M") :
+                if confirmation==result.amount:
+                    if result.offer=="Valentine":
+                        return render_template("services/valentines.html",contex=result)
+                    elif result.offer=="Birthday":
+                        return render_template("services/birthday.html",contex=result)
+                    else :
+                        return render_template("services/graduation.html",contex=result)
+                else :
+                    flash("Payment has not be completed")
+                    return redirect(url_for("celebration.showcase"))
+            else:
+                flash("The set delivery date has not been  reached kindly be patient")
+                return redirect(url_for("celebration.showcase"))
         else :
             flash("No data entered")
             return redirect(url_for("celebration.showcase"))
