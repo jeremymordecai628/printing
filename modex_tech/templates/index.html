@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modexs Technologies</title>
+    <title>Ressen Garden Group</title>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -157,7 +157,7 @@
 <body>
 
 <header>
-    <h1>Modexs Technologies</h1>
+    <h1>RessenGardenGroup</h1>
 </header>
 
 <section class="hero">
@@ -177,10 +177,10 @@
         <a href="{{ url_for('pages.printing') }}" class="service-link">
             <div class="service-card">
 		     <div class="card-slider">
-			     {% for img in printing_imgs %}
-			     <img src="{{ url_for('static', filename='images/cyber/' ~ img) }}"
-			     class="{% if loop.first %}active{% endif %}">
-			     {% endfor %}
+			     <!--{% for img in printing_imgs %}-->
+			     <!--<img src="{{ url_for('static', filename='images/cyber/' ~ img) }}"-->
+			     <!--class="{% if loop.first %}active{% endif %}">-->
+			     <!--{% endfor %}-->
 		     </div>
                 <h4>Printing Services</h4>
                 <p>Professional printing, scanning, and document management.</p>
@@ -190,10 +190,10 @@
         <a href="{{ url_for('pages.psgames') }}" class="service-link">
             <div class="service-card">
 		     <div class="card-slider">
-			     {% for img in game_imgs %}
-			     <img src="{{ url_for('static', filename='images/games/' ~ img) }}"
-			     class="{% if loop.first %}active{% endif %}">
-			     {% endfor %}
+			     <!--{% for img in game_imgs %}-->
+			     <!--<img src="{{ url_for('static', filename='images/games/' ~ img) }}"-->
+			     <!--class="{% if loop.first %}active{% endif %}">-->
+			     <!--{% endfor %}-->
 		     </div>
                 <h4>Play Stastion Games</h4>
                 <p>LAN/WAN setup, cabling, and network troubleshooting.</p>
@@ -204,10 +204,10 @@
 	<a href="{{url_for('pages.library')}} " class="service-link">
 		<div class="service-card">
 		     <div class="card-slider">
-			     {% for img in library_imgs %}
-			     <img src="{{ url_for('static', filename='images/store/' ~ img) }}"
-			     class="{% if loop.first %}active{% endif %}">
-			     {% endfor %}
+			     <!--{% for img in library_imgs %}-->
+			     <!--<img src="{{ url_for('static', filename='images/store/' ~ img) }}"-->
+			     <!--class="{% if loop.first %}active{% endif %}">-->
+			     <!--{% endfor %}-->
 		     </div>
                 <h4>App Library</h4>
                 <p>Custom web applications and backend systems.</p>
@@ -216,10 +216,10 @@
 
             <div class="service-card">
 		     <div class="card-slider">
-			     {% for img in support_imgs %}
-			     <img src="{{ url_for('static', filename='images/customer_care/' ~ img) }}"
-			     class="{% if loop.first %}active{% endif %}">
-			     {% endfor %}
+			     <!--{% for img in support_imgs %}-->
+			     <!--<img src="{{ url_for('static', filename='images/customer_care/' ~ img) }}"-->
+			     <!--class="{% if loop.first %}active{% endif %}">-->
+			     <!--{% endfor %}-->
 		     </div>
                 <h4>Technical Support</h4>
                 <p>On-site and remote IT support services.</p>
@@ -228,10 +228,10 @@
 	<a href="{{ url_for('pages.maintenance') }}" class="service-link">
 		<div class="service-card">
 			 <div class="card-slider">
-				 {% for img in maintenance_imgs %}
-				 <img src="{{ url_for('static', filename='images/maintainance/' ~ img) }}"
-				 class="{% if loop.first %}active{% endif %}">
-				 {% endfor %}
+				 <!--{% for img in maintenance_imgs %}-->
+				 <!--<img src="{{ url_for('static', filename='images/maintainance/' ~ img) }}"-->
+				 <!--class="{% if loop.first %}active{% endif %}">-->
+				 <!--{% endfor %}-->
 			 </div>
 			<h4>IT Maintenance</h4>
 			<p>Preventive and corrective maintenance for computers and servers.</p>

@@ -29,12 +29,12 @@ pages_bp = Blueprint('pages', __name__)
 @pages_bp.route("/")
 def home():
     return render_template(
-        "index.html",
-        maintenance_imgs=get_images(current_app, "maintainance"),
-        printing_imgs=get_images(current_app, "cyber"),
-        game_imgs=get_images(current_app, "games"),
-        library_imgs=get_images(current_app, "store"),
-        support_imgs=get_images(current_app, "customer_care")
+        "index.html"
+        # maintenance_imgs=get_images(current_app, "maintainance"),
+        # printing_imgs=get_images(current_app, "cyber"),
+        # game_imgs=get_images(current_app, "games"),
+        # library_imgs=get_images(current_app, "store"),
+        # support_imgs=get_images(current_app, "customer_care")
     )
 
 

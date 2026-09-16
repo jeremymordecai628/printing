@@ -5,7 +5,7 @@ from xhtml2pdf import pisa
 import os
 import json   
 from extensions import db
-from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download, assign_id,Login
+from models import  User, Payment,Library, verify, login_required, apply_code, hash_value,Download, assign_id,Login,send_email
 from config import UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 
@@ -91,52 +91,104 @@ def initialiseapp():
                 "status": "error",
                 "message": str(e)
             }), 500
+def upload_file():
+    """
+    Receive a file and upload it to Google Drive.
+    """
 
-@process_bp.route("/mpesa_confirmation", methods=["POST"])
+    try:
+        file = request.files.get("file")
+
+        if not file:
+            flash("No file was uploaded")
+            return redirect(url_for("pages.printing"))
+
+        if not file.filename:
+            flash ("No filename was provided")
+            return redirect(url_for("pages.printing"))
+            
+        uploaded_file = upload_to_google_drive(file)
+        file_id = uploaded_file.get("id") 
+        file_name = uploaded_file.get("name") 
+        mime_type = uploaded_file.get("mimeType")
+        file_size = uploaded_file.get("size") 
+        drive_url = uploaded_file.get("webViewLink")
+        if not file_id: 
+            flash("sorry their is an inconvience kindly repot it") 
+            return redirect(url_for("pages.printing"))
+          send_email(email, "printing payments",
+                """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Payment</title></head><body>
+                <h2>Make Payment</h2>    <p> Hey we received your file called
+                {{file_name}} we charge for printing at 5/= per pagefor black
+                and white a 10/= per page for drawings.Kindly count you pages
+                and make your payments you will receive a call if their is any
+                issues do not hesistate  to reachout if their is a promblem </p>
+                <p><strong>Buy Goods and Services</strong>Enter our Till Number:
+                </p><h3>123456</h3><p>Enter the amount required and complete the
+                payment.After payment, you will receive an M-PESA confirmation
+                message.</p><p> <strong>Step 4:</strong> Enter the transaction
+                ID from the M-PESA message below.</p>
+                <form method="POST" action="{{ url_for('pages.payment') }}">
+                <input type="hidden"name="file_id"value="{{ file_id }}">
+                <input type="hidden"name="service_type"value="{{ service_type}}"
+                ><label for="transaction_id"> M-PESA Transaction ID</label> 
+                <br><input type="text"id="transaction_id"name="transaction_id"
+                placeholder="e.g. QGH7K8ABC1"required maxlength="20"
+                autocomplete="off"><br><br><button type="submit">Submit Payment
+                </button></form></body></html>""")
+        flash("File was uploaded succesfully")
+        return redirect(url_for("pages.printing"))
+        
+    except ValueError as error:
+        return jsonify({
+            "success": False,
+            "message": str(error)
+        }), 400
 def mpesa_confirmation():
-    try :
+    """
+    Receive and process an M-PESA C2B confirmation.
+    """
+
+    try:
         data = request.get_json(silent=True)
+
         if not data:
             return jsonify({"ResultCode": 1,"ResultDesc": "Invalid request"}), 400
-
-        # M-Pesa confirmation fields
+        # M-PESA transaction details
         transaction_type = data.get("TransactionType")
         transaction_id = data.get("TransID")
         transaction_time = data.get("TransTime")
         amount = data.get("TransAmount")
         business_short_code = data.get("BusinessShortCode")
-        bill_ref_number = data.get("BillRefNumber")
-        invoice_number = data.get("InvoiceNumber")
-        org_account_balance = data.get("OrgAccountBalance")
-        third_party_transaction_id = data.get("ThirdPartyTransID")
         phone_number = data.get("MSISDN")
         first_name = data.get("FirstName")
         middle_name = data.get("MiddleName")
         last_name = data.get("LastName")
-        # Check whether this transaction has already been processed
-        # This prevents duplicate processing if Safaricom retries the callback.
-        existing_payment = Payment.query.filter_by(transaction_id=transaction_id).first()
-        gift= GiftRegistration.query.filter_by(account=bill_ref_number).first()
+        third_party_transaction_id = data.get("ThirdPartyTransID")
+        # Validate the transaction ID
+        if not transaction_id:
+            return jsonify({"ResultCode": 1,"ResultDesc": "Missing transactionID            }), 400
 
+        # Prevent duplicate transactions
+        existing_payment = Payment.query.filter_by(transaction_id=transaction_id        ).first()
         if existing_payment:
-            return jsonify({"ResultCode": 0,"ResultDesc": "Already processed"}), 200
+            return jsonify({"ResultCode": 0,"ResultDesc": "Transaction alreadyprocessed"}), 200
 
         # Create payment record
         payment = Payment(
-                transaction_id=transaction_id,
-                amount=amount,
-                phone_number=phone_number,
-                account_number=bill_ref_number,
-                transaction_time=transaction_time
-                )
+            transaction_id=transaction_id,
+            amount=amount,
+            phone_number=phone_number,
+            transaction_time=transaction_time
+        )
         db.session.add(payment)
-
-        # Mark the gift as paid
-        gift.status = "Paid"
         db.session.commit()
+
         return jsonify({"ResultCode": 0,"ResultDesc": "Accepted"}), 200
-    except Exception as e:
-        return f"Error loading records: {e}"
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({"ResultCode": 1,"ResultDesc": "Internal server error"       }), 500
 
 # -------------------------
 # Promo

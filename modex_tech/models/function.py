@@ -138,6 +138,29 @@ def assign_id(n):
         print(f"Error generating number: {e}")
         return None
 
+def handle_route_error(e, redirect_endpoint="/auth/dashboard"):
+    """Handle route errors and store them in the database."""
+
+    user_id = session.get("user_id", "anonymous")
+
+    error_log = RouteError(
+        endpoint=request.endpoint,
+        path=request.path,
+        user_id=user_id,
+        error=str(e)
+    )
+
+    try:
+        db.session.add(error_log)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        logging.exception("Failed to save route error to database")
+
+    flash("An error occurred kindly report it")
+
+    return redirect(redirect_endpoint)
+
 def role_required(*roles):
     def decorator(f):
         @wraps(f)
