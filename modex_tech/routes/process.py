@@ -2,6 +2,8 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 from io import BytesIO
 from PyPDF2 import PdfReader
 from xhtml2pdf import pisa
+from werkzeug.utils import secure_filename
+from google_drive import upload_to_google_drive
 import os
 import json   
 from extensions import db
@@ -91,6 +93,7 @@ def initialiseapp():
                 "status": "error",
                 "message": str(e)
             }), 500
+@process_bp.route("/upload_file",methods=["POST"]) 
 def upload_file():
     """
     Receive a file and upload it to Google Drive.
@@ -116,27 +119,28 @@ def upload_file():
         if not file_id: 
             flash("sorry their is an inconvience kindly repot it") 
             return redirect(url_for("pages.printing"))
-          send_email(email, "printing payments",
-                """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Payment</title></head><body>
-                <h2>Make Payment</h2>    <p> Hey we received your file called
-                {{file_name}} we charge for printing at 5/= per pagefor black
-                and white a 10/= per page for drawings.Kindly count you pages
-                and make your payments you will receive a call if their is any
-                issues do not hesistate  to reachout if their is a promblem </p>
-                <p><strong>Buy Goods and Services</strong>Enter our Till Number:
-                </p><h3>123456</h3><p>Enter the amount required and complete the
-                payment.After payment, you will receive an M-PESA confirmation
-                message.</p><p> <strong>Step 4:</strong> Enter the transaction
-                ID from the M-PESA message below.</p>
-                <form method="POST" action="{{ url_for('pages.payment') }}">
-                <input type="hidden"name="file_id"value="{{ file_id }}">
-                <input type="hidden"name="service_type"value="{{ service_type}}"
-                ><label for="transaction_id"> M-PESA Transaction ID</label> 
-                <br><input type="text"id="transaction_id"name="transaction_id"
-                placeholder="e.g. QGH7K8ABC1"required maxlength="20"
-                autocomplete="off"><br><br><button type="submit">Submit Payment
-                </button></form></body></html>""")
+        send_email(email, "printing payments",
+        """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Payment</title></head><body>
+        <h2>Make Payment</h2>    <p> Hey we received your file called
+        {{file_name}} we charge for printing at 5/= per pagefor black
+        and white a 10/= per page for drawings.Kindly count you pages
+        and make your payments you will receive a call if their is any
+        issues do not hesistate  to reachout if their is a promblem </p>
+        <p><strong>Buy Goods and Services</strong>Enter our Till Number:
+        </p><h3>123456</h3><p>Enter the amount required and complete the
+        payment.After payment, you will receive an M-PESA confirmation
+        message.</p><p> <strong>Step 4:</strong> Enter the transaction
+        ID from the M-PESA message below.</p>
+        <form method="POST" action="{{ url_for('pages.payment') }}">
+        <input type="hidden"name="file_id"value="{{ file_id }}">
+        <input type="hidden"name="service_type"value="{{ service_type}}"
+        ><label for="transaction_id"> M-PESA Transaction ID</label> 
+        <br><input type="text"id="transaction_id"name="transaction_id"
+        placeholder="e.g. QGH7K8ABC1"required maxlength="20"
+        autocomplete="off"><br><br><button type="submit">Submit Payment
+        </button></form></body></html>""")
+
         flash("File was uploaded succesfully")
         return redirect(url_for("pages.printing"))
         
@@ -145,6 +149,7 @@ def upload_file():
             "success": False,
             "message": str(error)
         }), 400
+@process_bp.route("/mpesa_confirmation" , methods=["POST"])
 def mpesa_confirmation():
     """
     Receive and process an M-PESA C2B confirmation.
@@ -168,7 +173,7 @@ def mpesa_confirmation():
         third_party_transaction_id = data.get("ThirdPartyTransID")
         # Validate the transaction ID
         if not transaction_id:
-            return jsonify({"ResultCode": 1,"ResultDesc": "Missing transactionID            }), 400
+            return jsonify({"ResultCode": 1,"ResultDesc": "Missing transactionID"}), 400
 
         # Prevent duplicate transactions
         existing_payment = Payment.query.filter_by(transaction_id=transaction_id        ).first()
@@ -282,26 +287,6 @@ def search():
 
     except Exception as e:
         return f"Search Error: {e}"
-
-
-# -------------------------
-# Upload
-# -------------------------
-@process_bp.route('/upload', methods=['GET', 'POST'])
-def upload():
-    uploaded_file = request.files.get("file")
-    filename = secure_filename(uploaded_file.filename)
-    filepath = os.path.join("uploads",filename)
-    uploaded_file.save(filepath)
-    google_file_id = upload_to_google_drive(drive_service,filepath,filename)
-    new_file = UploadedFile(
-        filename=filename,
-        google_file_id=google_file_id
-    )
-    db.session.add(new_file)
-    db.session.commit()
-    os.remove(filepath)
-    return "Upload successful"
 
 
 # -------------------------

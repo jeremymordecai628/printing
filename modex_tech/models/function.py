@@ -21,7 +21,7 @@ from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse, urljoin
 from email.mime.text import MIMEText
-from flask import session, redirect, url_for, flash, request
+from flask import session, redirect, url_for, flash, request,current_app
 from flask_login import current_user
 from .data import User,Login  
 
@@ -45,6 +45,8 @@ def generate_uuid():
     """
 
     return uuid.uuid4().hex
+
+
 
 def allowed_file(filename: str) -> bool:
     """
@@ -240,41 +242,56 @@ def get_images(app, folder: str):
 # =========================
 # EMAIL SENDING
 # =========================
+#!/usr/bin/python3
 
-def send_email(recipient_email: str, subject: str, body: str):
-    """
-    Send email using SMTP from environment variables.
-    """
-
-    MAIL_SERVER = os.getenv("MAIL_SERVER")
-    MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS") == "True"
-    MAIL_USE_SSL = os.getenv("MAIL_USE_SSL") == "True"
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+def send_email(recipient_email, subject, body):
+    sender_email = current_app.config.get("MAIL_DEFAULT_SENDER")
+    smtp_server = current_app.config.get("MAIL_SERVER")
+    smtp_port = current_app.config.get("MAIL_PORT")
+    smtp_user = current_app.config.get("MAIL_USERNAME")
+    smtp_password = current_app.config.get("MAIL_PASSWORD")
+    smtp_tls = current_app.config.get("MAIL_USE_TLS")
 
     msg = MIMEText(body, "html")
     msg["Subject"] = subject
-    msg["From"] = MAIL_USERNAME
+    msg["From"] = sender_email
     msg["To"] = recipient_email
 
     try:
-        if MAIL_USE_SSL:
-            server = smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT)
-        else:
-            server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT)
-            if MAIL_USE_TLS:
-                server.starttls()
+        print("Connecting to SMTP server...", flush=True)
 
-        server.login(MAIL_USERNAME, MAIL_PASSWORD)
-        server.sendmail(MAIL_USERNAME, [recipient_email], msg.as_string())
-        server.quit()
+        with smtplib.SMTP(
+            smtp_server,
+            smtp_port,
+            timeout=15
+        ) as server:
+
+            print("Connected to SMTP server", flush=True)
+
+            if smtp_tls:
+                print("Starting TLS...", flush=True)
+                server.starttls()
+                print("TLS started", flush=True)
+
+            print("Logging into SMTP...", flush=True)
+            server.login(smtp_user, smtp_password)
+            print("SMTP login successful", flush=True)
+
+            print("Sending email...", flush=True)
+
+            server.sendmail(
+                sender_email,
+                [recipient_email],
+                msg.as_string()
+            )
+
+            print("Email sent successfully", flush=True)
 
         return "Email sent successfully"
 
     except Exception as e:
-        return f"Failed: {str(e)}"
-
+        print("Email failed:", e, flush=True)
+        return f"Failed to send email: {str(e)}"
 
 # =========================
 # CODE GENERATION

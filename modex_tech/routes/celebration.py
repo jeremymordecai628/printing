@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 import traceback
+from extensions import db
 from scheduler import schedule_event
-from flask import Blueprint,flash,redirect,render_template,request,url_for
+from flask import Blueprint,flash,redirect,render_template,request,url_for,session
 from models import generate_tracking_code,GiftRegistration,send_email  
 from flask_login import current_user
 
@@ -27,11 +28,10 @@ def register_gift():
             offer = request.form.get("offer")
             delivery_date = request.form.get("delivery_date")
             message = request.form.get("message")
-            link = url_for("gifts.view_gift",user_id=user_id,account=account,_external=True)
-            tracking_code = generate_tracking_code(current_user.get_id(),offer)
+            link = url_for("celebration.view_gift",user_id=sender_email,_external=True)
+            tracking_code = generate_tracking_code(sender_email,offer,delivery_date)
 
             gift = GiftRegistration(
-                    sender_id=current_user.get_id(),
                     sender_email=sender_email,
                     recipient_name=recipient_name,
                     recipient_email=recipient_email,
@@ -40,11 +40,15 @@ def register_gift():
                     delivery_date=delivery_date,
                     message=message,
                     link=link,
-                    status="NotPaid"
+                    gift_id=tracking_code,
+                    status="NotPaid" 
                     )
             db.session.add(gift)
             db.session.commit()
-            schedule_event(GiftRegistration)
+            print("BEFORE SCHEDULER", flush=True)
+            schedule_event(gift)
+            print("AFTER SCHEDULER", flush=True)
+            print("BEFORE EMAIL", flush=True)
             send_email(sender_email,
                        "Gift Registration",
                        """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>You have something waiting for you</title>

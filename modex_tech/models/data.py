@@ -133,13 +133,15 @@ class GiftRegistration(db.Model):
 
     __tablename__ = "gift_registrations"
 
-    id = db.Column(db.String(4),primary_key=True,default=uuid)
-    account=db.Column(db.String(100),nullable=False)
+    id = db.Column(db.String(4),primary_key=True,default=lambda: uuid.uuid4().hex[:4])
     sender_email = db.Column(db.String(150),nullable=False)
     recipient_name = db.Column(db.String(100),nullable=False)
     recipient_email = db.Column(db.String(150),nullable=False)
     charges=db.Column(db.Float,nullable=False)   
     offer = db.Column(db.Enum("Valentine","Birthday","Graduation",name="gift_offer_enum"),nullable=False)
     delivery_date = db.Column(db.Date,nullable=True)
+    link = db.Column(db.String(500), nullable=True)
+    gift_id=db.Column(db.String(100),unique=True,nullable=False)
+    status=db.Column(db.Enum("NotPaid","Paid","Terminated"),nullable=False)
     message = db.Column(db.Text,nullable=True)
     created_at = db.Column(db.DateTime,default=datetime.utcnow)

@@ -88,7 +88,7 @@
       {% endif %}
     {% endwith %}
 
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST"  action="{{url_for('process.upload_file')}}"   enctype="multipart/form-data">
       <input type="file" name="file" required>
       <button type="submit">Upload</button>
     </form>

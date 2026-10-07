@@ -11,15 +11,13 @@ def event_reached(event):
     This function runs when the scheduled event time is reached.
     """
 
-    if event.tittle==Delivery:
-        result=db.query.session(GiftRegistration.recipient_email).filter(account==event.account).first()
-        html=render_template("emails/special_day.html")
-        send_email(result,"Day Notification",html)
+    if event.tittle==Terminate:
+        result=db.query.session(GiftRegistration).filter(gift_id==event.gift_id).first()
+        result.status="Terminated"
+        db.commit()
     else:
-         result=db.query.session(GiftRegistration).filter(account==event.account).first()
-         result.status="Terminated"
-         db.commit()
-
+        html=render_template("emails/special_day.html")
+        send_email(event.sender_email,"Day Notification",html)
 
 def schedule_event(event):
     """
@@ -29,11 +27,12 @@ def schedule_event(event):
     scheduler.add_job(
         event_reached,
         trigger="date",
-        run_date=event.start_time,
+        run_date=event.delivery_date,
         args=[event],
-        id=f"event_{event.id}",
+        id=f"event_{event.gift_id}",
         replace_existing=True
     )
+    print("Event logged in")
 
 
 def start_scheduler():
